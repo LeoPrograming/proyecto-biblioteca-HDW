@@ -7,6 +7,9 @@ const baseConfig = {
     dialect: "mysql",
     timezone: "+00:00",
     logging: false,
+
+    seederStorage: "sequelize",
+    seederStorageTableName: "SequelizeData",
 };
 
 module.exports = {

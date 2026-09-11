@@ -99,8 +99,6 @@ module.exports = {
         table: "areas",
         fields: ["company_id", "id"],
       },
-      onUpdate: "CASCADE",
-      onDelete: "RESTRICT",
     });
 
     await queryInterface.addConstraint("users", {

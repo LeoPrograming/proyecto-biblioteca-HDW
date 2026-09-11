@@ -13,12 +13,6 @@ module.exports = {
       priority_id: {
         type: Sequelize.BIGINT.UNSIGNED,
         allowNull: false,
-        references: {
-          model: "priorities",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "RESTRICT",
       },
 
       version: {
@@ -60,6 +54,18 @@ module.exports = {
             "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
         ),
       },
+    });
+
+    await queryInterface.addConstraint("sla_policies", {
+      fields: ["priority_id"],
+      type: "foreign key",
+      name: "fk_sla_policies_priority",
+      references: {
+        table: "priorities",
+        field: "id",
+      },
+      onUpdate: "RESTRICT",
+      onDelete: "RESTRICT",
     });
 
     await queryInterface.addConstraint("sla_policies", {
@@ -113,9 +119,13 @@ module.exports = {
       ),
     });
 
-    await queryInterface.addIndex("sla_policies", ["priority_id"], {
-      name: "idx_sla_priority",
-    });
+    await queryInterface.addIndex(
+        "sla_policies",
+        ["priority_id"],
+        {
+          name: "idx_sla_priority",
+        }
+    );
 
     await queryInterface.addIndex(
         "sla_policies",
@@ -124,21 +134,6 @@ module.exports = {
           name: "idx_sla_priority_active",
         }
     );
-    await queryInterface.sequelize.query(`
-        ALTER TABLE sla_policies
-        ADD COLUMN active_priority_id BIGINT UNSIGNED
-        GENERATED ALWAYS AS (
-          CASE
-            WHEN is_active = 1 THEN priority_id
-            ELSE NULL
-          END
-        ) STORED
-    `);
-    await queryInterface.addConstraint("sla_policies", {
-      fields: ["active_priority_id"],
-      type: "unique",
-      name: "uq_sla_one_active_per_priority",
-    });
   },
 
   async down(queryInterface) {
