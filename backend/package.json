@@ -5,13 +5,24 @@
   "main": "index.js",
   "scripts": {
     "start": "node --env-file=.env src/server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "db:migrate": "node --env-file=.env ./node_modules/sequelize-cli/lib/sequelize db:migrate",
+    "db:migrate:undo": "node --env-file=.env ./node_modules/sequelize-cli/lib/sequelize db:migrate:undo",
+    "db:migrate:status": "node --env-file=.env ./node_modules/sequelize-cli/lib/sequelize db:migrate:status",
+    "db:seed": "node --env-file=.env ./node_modules/sequelize-cli/lib/sequelize db:seed:all",
+    "db:seed:undo": "node --env-file=.env ./node_modules/sequelize-cli/lib/sequelize db:seed:undo:all"
   },
+
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mysql2": "^3.24.4",
+    "sequelize": "^6.37.8"
+  },
+  "devDependencies": {
+    "sequelize-cli": "^6.6.5"
   }
 }
