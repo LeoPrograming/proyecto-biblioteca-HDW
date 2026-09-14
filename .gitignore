@@ -1,0 +1,23 @@
+# Archivos generados
+target/
+out/
+*.class
+*.log
+
+# Entorno de desarrollo
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Configuracion local
+.env
+.env.*
+!.env.example
+application-local.properties
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
