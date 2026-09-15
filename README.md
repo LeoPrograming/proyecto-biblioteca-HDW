@@ -315,3 +315,8 @@ Las dependencias se incorporan conforme sean necesarias para cada Issue.
 ## Siguiente avance
 
 Incorporar las entidades y funcionalidades de persistencia correspondientes a las siguientes Issues, reutilizando la infraestructura JPA configurada en esta etapa.
+
+## Issue 04 - Repositorios de Usuario
+* Se implementó `UsuarioRepository` con consultas de validación (DNI, Correo, Usuario) y de autenticación (`findByUsuario`).
+* Se implementó `TipoUsuarioRepository`.
+* Las interfaces extienden `JpaRepository` y son compatibles con Java 17.
