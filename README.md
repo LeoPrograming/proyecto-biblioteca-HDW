@@ -524,3 +524,23 @@ Las dependencias se incorporan cuando una Issue las necesita.
 ## Próximos avances
 
 Al integrar la Issue 06, las tareas de autenticación y servicio inicial de usuarios podrán utilizar el DTO y las validaciones disponibles, siempre que sus demás dependencias estén completas.
+
+## Autenticación básica
+
+La autenticación del backend se realiza mediante el siguiente endpoint:
+
+**Método:** `POST`
+
+**Ruta:**
+
+`/api/auth/login`
+
+### Datos de entrada
+
+La solicitud debe enviarse en formato JSON:
+
+```json
+{
+  "usuario": "nombre_usuario",
+  "contrasena": "contraseña"
+}

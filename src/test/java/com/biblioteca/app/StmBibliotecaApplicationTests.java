@@ -9,6 +9,9 @@ import org.springframework.web.servlet.DispatcherServlet;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.biblioteca.app.repository.UsuarioRepository;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
 @SpringBootTest(properties = {
         "spring.autoconfigure.exclude=" +
                 "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration," +
@@ -18,6 +21,9 @@ class StmBibliotecaApplicationTests {
 
     @Autowired
     private ConfigurableApplicationContext context;
+
+    @MockitoBean
+    private UsuarioRepository usuarioRepository;
 
     @Test
     void debeCargarElContextoDeSpring() {
