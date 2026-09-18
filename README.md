@@ -544,3 +544,8 @@ La solicitud debe enviarse en formato JSON:
   "usuario": "nombre_usuario",
   "contrasena": "contraseña"
 }
+
+### Issue 09 - Servicio inicial de usuarios
+* Se implementó `UsuarioService` manteniendo la lógica de negocio separada de los controladores.
+* Operaciones incluidas: `listarUsuarios`, `buscarUsuarios`, `buscarPorId`, `registrar`, `actualizar`, `cambiarEstado` y `convertirADTO`.
+* Se incorporaron validaciones de unicidad y encriptación BCrypt antes de persistir en MySQL.
