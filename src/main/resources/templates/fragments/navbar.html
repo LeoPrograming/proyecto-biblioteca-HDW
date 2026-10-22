@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<header th:fragment="navbar" class="main-navbar">
+
+    <div class="navbar-brand">
+        <div class="navbar-logo">📚</div>
+
+        <div>
+            <strong>Biblioteca Virtual General</strong>
+        </div>
+    </div>
+
+    <div class="navbar-actions">
+
+        <span id="usuarioActual" class="navbar-user">Usuario</span>
+
+        <button id="btnCerrarSesion" class="btn-danger">
+            Cerrar sesión
+        </button>
+
+    </div>
+
+</header>
+
+</body>
+</html>
