@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Registrar Usuario')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="form-page">
+
+    <section class="form-card">
+
+        <div class="form-title">
+            <div>
+                <h1>Registrar Usuario</h1>
+                <p>Complete la información del nuevo usuario.</p>
+            </div>
+
+            <a th:href="@{/usuarios}" class="btn btn-gray">
+                Regresar
+            </a>
+        </div>
+
+        <form id="formNuevoUsuario" class="management-form">
+
+            <div class="form-grid">
+
+                <div class="form-field">
+                    <label for="dni">DNI</label>
+                    <input type="text" id="dni" maxlength="20" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="usuarioNuevo">Usuario</label>
+                    <input type="text" id="usuarioNuevo" maxlength="20" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="nombres">Nombres</label>
+                    <input type="text" id="nombres" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="apellidos">Apellidos</label>
+                    <input type="text" id="apellidos" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="correoE">Correo</label>
+                    <input type="email" id="correoE">
+                </div>
+
+                <div class="form-field">
+                    <label for="telefono">Teléfono</label>
+                    <input type="text" id="telefono">
+                </div>
+
+                <div class="form-field form-field-full">
+                    <label for="direccion">Dirección</label>
+                    <input type="text" id="direccion">
+                </div>
+
+                <div class="form-field">
+                    <label for="idTipoUsuario">Rol</label>
+
+                    <select id="idTipoUsuario" required>
+                        <option value="">Seleccione</option>
+                        <option value="1">Administrador</option>
+                        <option value="2">Bibliotecario</option>
+                        <option value="3">Lector</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="contrasenaNueva">Contraseña</label>
+                    <input
+                            type="password"
+                            id="contrasenaNueva"
+                            required>
+                </div>
+
+            </div>
+
+            <div id="mensajeFormulario" class="form-message"></div>
+
+            <div class="form-actions">
+
+                <button type="submit" class="btn btn-blue">
+                    Guardar usuario
+                </button>
+
+                <a th:href="@{/usuarios}" class="btn btn-gray">
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>

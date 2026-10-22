@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Editar Usuario')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="form-page">
+
+    <section class="form-card">
+
+        <div class="form-title">
+
+            <div>
+                <h1>Editar Usuario</h1>
+                <p>Actualice la información del usuario seleccionado.</p>
+            </div>
+
+            <a th:href="@{/usuarios}" class="btn btn-gray">
+                Regresar
+            </a>
+
+        </div>
+
+        <form id="formEditarUsuario" class="management-form">
+
+            <input type="hidden" id="idUsuarioEditar">
+
+            <div class="form-grid">
+
+                <div class="form-field">
+                    <label for="dniEditar">DNI</label>
+                    <input type="text" id="dniEditar" maxlength="20">
+                </div>
+
+                <div class="form-field">
+                    <label for="usuarioEditar">Usuario</label>
+                    <input type="text" id="usuarioEditar" maxlength="20">
+                </div>
+
+                <div class="form-field">
+                    <label for="nombresEditar">Nombres</label>
+                    <input type="text" id="nombresEditar">
+                </div>
+
+                <div class="form-field">
+                    <label for="apellidosEditar">Apellidos</label>
+                    <input type="text" id="apellidosEditar">
+                </div>
+
+                <div class="form-field">
+                    <label for="correoEditar">Correo</label>
+                    <input type="email" id="correoEditar">
+                </div>
+
+                <div class="form-field">
+                    <label for="telefonoEditar">Teléfono</label>
+                    <input type="text" id="telefonoEditar">
+                </div>
+
+                <div class="form-field form-field-full">
+                    <label for="direccionEditar">Dirección</label>
+                    <input type="text" id="direccionEditar">
+                </div>
+
+                <div class="form-field">
+                    <label for="tipoUsuarioEditar">Rol</label>
+
+                    <select id="tipoUsuarioEditar">
+                        <option value="1">Administrador</option>
+                        <option value="2">Bibliotecario</option>
+                        <option value="3">Lector</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="contrasenaEditar">
+                        Nueva contraseña
+                    </label>
+
+                    <input
+                            type="password"
+                            id="contrasenaEditar"
+                            placeholder="Dejar vacío para mantener">
+                </div>
+
+            </div>
+
+            <div id="mensajeEditar" class="form-message"></div>
+
+            <div class="form-actions">
+
+                <button type="submit" class="btn btn-blue">
+                    Guardar cambios
+                </button>
+
+                <a th:href="@{/usuarios}" class="btn btn-gray">
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>

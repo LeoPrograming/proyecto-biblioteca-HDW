@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Gestión de Usuarios')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="management-container">
+
+    <div class="management-header">
+        <h1>Gestión de Usuarios</h1>
+    </div>
+
+    <div class="action-bar">
+
+        <button class="btn btn-blue" id="btnAgregarUsuario">
+            Agregar
+        </button>
+
+        <button class="btn btn-yellow" id="btnEditarUsuario" disabled>
+            Editar
+        </button>
+
+        <button class="btn btn-red" id="btnEstadoUsuario" disabled>
+            Cambiar estado
+        </button>
+
+        <a th:href="@{/dashboard}" class="btn btn-gray">
+            Regresar
+        </a>
+
+    </div>
+
+    <div class="usuarios-search">
+
+        <input
+                type="text"
+                id="buscarUsuario"
+                placeholder="Buscar por DNI o usuario">
+
+        <button class="btn btn-blue" id="btnBuscarUsuario">
+            Buscar
+        </button>
+
+        <button class="btn btn-gray" id="btnLimpiarBusqueda">
+            Mostrar todos
+        </button>
+
+    </div>
+
+    <div id="mensajeUsuarios" class="mensaje"></div>
+
+    <div class="table-wrapper">
+
+        <table class="management-table">
+
+            <thead>
+            <tr>
+                <th></th>
+                <th>ID</th>
+                <th>DNI</th>
+                <th>Usuario</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Rol</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th>Estado</th>
+            </tr>
+            </thead>
+
+            <tbody id="tablaUsuarios">
+
+            <tr>
+                <td colspan="11">
+                    Cargando usuarios...
+                </td>
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>
