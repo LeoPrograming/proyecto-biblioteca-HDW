@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Gestión de Autores')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="management-container">
+
+    <div class="management-header">
+        <h1>Gestión de Autores</h1>
+    </div>
+
+    <div class="action-bar">
+
+        <button
+                class="btn btn-blue"
+                id="btnAgregarAutor">
+            Agregar
+        </button>
+
+        <button
+                class="btn btn-yellow"
+                id="btnEditarAutor"
+                disabled>
+            Editar
+        </button>
+
+        <button
+                class="btn btn-red"
+                id="btnEstadoAutor"
+                disabled>
+            Cambiar estado
+        </button>
+
+        <a
+                th:href="@{/dashboard}"
+                class="btn btn-gray">
+            Regresar
+        </a>
+
+    </div>
+
+    <div class="usuarios-search">
+
+        <input
+                type="text"
+                id="buscarAutor"
+                placeholder="Buscar por nombre o apellido">
+
+        <button
+                class="btn btn-blue"
+                id="btnBuscarAutor">
+            Buscar
+        </button>
+
+        <button
+                class="btn btn-gray"
+                id="btnLimpiarBusquedaAutor">
+            Mostrar todos
+        </button>
+
+    </div>
+
+    <div
+            id="mensajeAutores"
+            class="mensaje">
+    </div>
+
+    <div class="table-wrapper">
+
+        <table class="management-table">
+
+            <thead>
+            <tr>
+                <th></th>
+                <th>ID</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Estado</th>
+            </tr>
+            </thead>
+
+            <tbody id="tablaAutores">
+
+            <tr>
+                <td colspan="5">
+                    Cargando autores...
+                </td>
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>

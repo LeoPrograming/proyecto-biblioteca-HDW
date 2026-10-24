@@ -1735,3 +1735,829 @@ async function cambiarEstadoLector() {
         }
     }
 }
+
+// =====================================================
+// MÓDULO AUTORES
+// =====================================================
+
+let autorSeleccionado = null;
+let autoresCargados = [];
+
+
+// =====================================================
+// INICIALIZACIÓN AUTORES
+// =====================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const tablaAutores =
+        document.getElementById("tablaAutores");
+
+    const buscarAutor =
+        document.getElementById("buscarAutor");
+
+    const btnBuscarAutor =
+        document.getElementById("btnBuscarAutor");
+
+    const btnLimpiarBusquedaAutor =
+        document.getElementById(
+            "btnLimpiarBusquedaAutor"
+        );
+
+
+    // LISTADO
+    if (tablaAutores) {
+
+        cargarAutores();
+
+        if (btnBuscarAutor) {
+
+            btnBuscarAutor.addEventListener(
+                "click",
+                () => {
+
+                    buscarAutores(
+                        buscarAutor.value.trim()
+                    );
+
+                }
+            );
+        }
+
+        if (buscarAutor) {
+
+            buscarAutor.addEventListener(
+                "keydown",
+                (event) => {
+
+                    if (event.key === "Enter") {
+
+                        buscarAutores(
+                            buscarAutor.value.trim()
+                        );
+
+                    }
+
+                }
+            );
+        }
+
+        if (btnLimpiarBusquedaAutor) {
+
+            btnLimpiarBusquedaAutor.addEventListener(
+                "click",
+                () => {
+
+                    buscarAutor.value = "";
+
+                    mostrarAutores(
+                        autoresCargados
+                    );
+
+                }
+            );
+        }
+    }
+
+
+    // AGREGAR
+    const btnAgregarAutor =
+        document.getElementById(
+            "btnAgregarAutor"
+        );
+
+    if (btnAgregarAutor) {
+
+        btnAgregarAutor.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "/autores/nuevo";
+
+            }
+        );
+    }
+
+
+    // EDITAR
+    const btnEditarAutor =
+        document.getElementById(
+            "btnEditarAutor"
+        );
+
+    if (btnEditarAutor) {
+
+        btnEditarAutor.addEventListener(
+            "click",
+            () => {
+
+                if (!autorSeleccionado) {
+                    return;
+                }
+
+                localStorage.setItem(
+                    "autorEditarId",
+                    autorSeleccionado
+                );
+
+                window.location.href =
+                    "/autores/editar";
+
+            }
+        );
+    }
+
+
+    // CAMBIAR ESTADO
+    const btnEstadoAutor =
+        document.getElementById(
+            "btnEstadoAutor"
+        );
+
+    if (btnEstadoAutor) {
+
+        btnEstadoAutor.addEventListener(
+            "click",
+            cambiarEstadoAutor
+        );
+    }
+
+
+    // NUEVO AUTOR
+    const formNuevoAutor =
+        document.getElementById(
+            "formNuevoAutor"
+        );
+
+    if (formNuevoAutor) {
+
+        formNuevoAutor.addEventListener(
+            "submit",
+            registrarAutor
+        );
+    }
+
+
+    // EDITAR AUTOR
+    const formEditarAutor =
+        document.getElementById(
+            "formEditarAutor"
+        );
+
+    if (formEditarAutor) {
+
+        cargarAutorEditar();
+
+        formEditarAutor.addEventListener(
+            "submit",
+            actualizarAutor
+        );
+    }
+
+});
+
+
+// =====================================================
+// CARGAR AUTORES
+// =====================================================
+
+async function cargarAutores() {
+
+    const tabla =
+        document.getElementById(
+            "tablaAutores"
+        );
+
+    const mensaje =
+        document.getElementById(
+            "mensajeAutores"
+        );
+
+    if (!tabla) {
+        return;
+    }
+
+    autorSeleccionado = null;
+
+    deshabilitarBotonesAutor();
+
+    tabla.innerHTML = `
+        <tr>
+            <td colspan="5">
+                Cargando autores...
+            </td>
+        </tr>
+    `;
+
+    try {
+
+        const response =
+            await fetch("/api/autores");
+
+        if (response.status === 401) {
+
+            window.location.href =
+                "/login";
+
+            return;
+        }
+
+        if (!response.ok) {
+
+            throw new Error(
+                "No se pudieron obtener los autores."
+            );
+        }
+
+        autoresCargados =
+            await response.json();
+
+        mostrarAutores(
+            autoresCargados
+        );
+
+        if (mensaje) {
+            mensaje.textContent = "";
+        }
+
+    } catch (error) {
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    No se pudieron cargar los autores.
+                </td>
+            </tr>
+        `;
+
+        if (mensaje) {
+            mensaje.textContent =
+                error.message;
+        }
+
+        console.error(error);
+    }
+}
+
+
+// =====================================================
+// MOSTRAR AUTORES
+// =====================================================
+
+function mostrarAutores(autores) {
+
+    const tabla =
+        document.getElementById(
+            "tablaAutores"
+        );
+
+    if (!tabla) {
+        return;
+    }
+
+    autorSeleccionado = null;
+
+    deshabilitarBotonesAutor();
+
+    if (
+        !autores ||
+        autores.length === 0
+    ) {
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    No se encontraron autores.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    tabla.innerHTML = "";
+
+    autores.forEach(autor => {
+
+        const fila =
+            document.createElement("tr");
+
+        const estado =
+            autor.estado
+                ? '<span class="estado-activo">Activo</span>'
+                : '<span class="estado-inactivo">Inactivo</span>';
+
+        fila.innerHTML = `
+
+            <td>
+                <input
+                    type="radio"
+                    name="autorSeleccionado"
+                    value="${autor.idAutor}">
+            </td>
+
+            <td>
+                ${autor.idAutor ?? ""}
+            </td>
+
+            <td>
+                ${autor.nombres ?? ""}
+            </td>
+
+            <td>
+                ${autor.apellidos ?? ""}
+            </td>
+
+            <td>
+                ${estado}
+            </td>
+        `;
+
+        tabla.appendChild(fila);
+
+    });
+
+    configurarSeleccionAutor();
+}
+
+
+// =====================================================
+// BUSCAR AUTORES
+// =====================================================
+
+function buscarAutores(texto) {
+
+    if (!texto) {
+
+        mostrarAutores(
+            autoresCargados
+        );
+
+        return;
+    }
+
+    const busqueda =
+        texto.toLowerCase();
+
+    const resultado =
+        autoresCargados.filter(
+            autor => {
+
+                const nombres =
+                    (autor.nombres ?? "")
+                        .toLowerCase();
+
+                const apellidos =
+                    (autor.apellidos ?? "")
+                        .toLowerCase();
+
+                const nombreCompleto =
+                    `${nombres} ${apellidos}`;
+
+                return (
+                    nombres.includes(busqueda) ||
+                    apellidos.includes(busqueda) ||
+                    nombreCompleto.includes(busqueda)
+                );
+
+            }
+        );
+
+    mostrarAutores(resultado);
+}
+
+
+// =====================================================
+// SELECCIONAR AUTOR
+// =====================================================
+
+function configurarSeleccionAutor() {
+
+    const radios =
+        document.querySelectorAll(
+            'input[name="autorSeleccionado"]'
+        );
+
+    radios.forEach(radio => {
+
+        radio.addEventListener(
+            "change",
+            () => {
+
+                autorSeleccionado =
+                    Number(radio.value);
+
+                const btnEditar =
+                    document.getElementById(
+                        "btnEditarAutor"
+                    );
+
+                const btnEstado =
+                    document.getElementById(
+                        "btnEstadoAutor"
+                    );
+
+                if (btnEditar) {
+                    btnEditar.disabled = false;
+                }
+
+                if (btnEstado) {
+                    btnEstado.disabled = false;
+                }
+
+            }
+        );
+
+    });
+}
+
+
+function deshabilitarBotonesAutor() {
+
+    const btnEditar =
+        document.getElementById(
+            "btnEditarAutor"
+        );
+
+    const btnEstado =
+        document.getElementById(
+            "btnEstadoAutor"
+        );
+
+    if (btnEditar) {
+        btnEditar.disabled = true;
+    }
+
+    if (btnEstado) {
+        btnEstado.disabled = true;
+    }
+}
+
+
+// =====================================================
+// REGISTRAR AUTOR
+// =====================================================
+
+async function registrarAutor(event) {
+
+    event.preventDefault();
+
+    const mensaje =
+        document.getElementById(
+            "mensajeAutorFormulario"
+        );
+
+    const datos = {
+
+        nombres:
+            document.getElementById(
+                "nombresAutor"
+            ).value.trim(),
+
+        apellidos:
+            document.getElementById(
+                "apellidosAutor"
+            ).value.trim(),
+
+        estado: true
+    };
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/autores",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(datos)
+                }
+            );
+
+        const respuesta =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                respuesta.mensaje ||
+                "No se pudo registrar el autor."
+            );
+        }
+
+        mensaje.className =
+            "form-message success";
+
+        mensaje.textContent =
+            "Autor registrado correctamente.";
+
+        setTimeout(() => {
+
+            window.location.href =
+                "/autores";
+
+        }, 700);
+
+    } catch (error) {
+
+        mensaje.className =
+            "form-message error";
+
+        mensaje.textContent =
+            error.message;
+    }
+}
+
+
+// =====================================================
+// CARGAR AUTOR PARA EDITAR
+// =====================================================
+
+async function cargarAutorEditar() {
+
+    const id =
+        localStorage.getItem(
+            "autorEditarId"
+        );
+
+    if (!id) {
+
+        window.location.href =
+            "/autores";
+
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/autores/${id}`
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "No se pudo cargar el autor."
+            );
+        }
+
+        const autor =
+            await response.json();
+
+        document.getElementById(
+            "idAutorEditar"
+        ).value =
+            autor.idAutor ?? "";
+
+        document.getElementById(
+            "nombresAutorEditar"
+        ).value =
+            autor.nombres ?? "";
+
+        document.getElementById(
+            "apellidosAutorEditar"
+        ).value =
+            autor.apellidos ?? "";
+
+    } catch (error) {
+
+        const mensaje =
+            document.getElementById(
+                "mensajeEditarAutor"
+            );
+
+        mensaje.className =
+            "form-message error";
+
+        mensaje.textContent =
+            error.message;
+    }
+}
+
+
+// =====================================================
+// ACTUALIZAR AUTOR
+// =====================================================
+
+async function actualizarAutor(event) {
+
+    event.preventDefault();
+
+    const id =
+        document.getElementById(
+            "idAutorEditar"
+        ).value;
+
+    const mensaje =
+        document.getElementById(
+            "mensajeEditarAutor"
+        );
+
+    try {
+
+        // Primero recuperamos el estado actual
+        const actualResponse =
+            await fetch(
+                `/api/autores/${id}`
+            );
+
+        if (!actualResponse.ok) {
+
+            throw new Error(
+                "No se pudo obtener el autor."
+            );
+        }
+
+        const autorActual =
+            await actualResponse.json();
+
+        const datos = {
+
+            nombres:
+                document.getElementById(
+                    "nombresAutorEditar"
+                ).value.trim(),
+
+            apellidos:
+                document.getElementById(
+                    "apellidosAutorEditar"
+                ).value.trim(),
+
+            estado:
+            autorActual.estado
+        };
+
+
+        const response =
+            await fetch(
+                `/api/autores/${id}`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(datos)
+                }
+            );
+
+        const respuesta =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                respuesta.mensaje ||
+                "No se pudo actualizar el autor."
+            );
+        }
+
+        mensaje.className =
+            "form-message success";
+
+        mensaje.textContent =
+            "Autor actualizado correctamente.";
+
+        localStorage.removeItem(
+            "autorEditarId"
+        );
+
+        setTimeout(() => {
+
+            window.location.href =
+                "/autores";
+
+        }, 700);
+
+    } catch (error) {
+
+        mensaje.className =
+            "form-message error";
+
+        mensaje.textContent =
+            error.message;
+    }
+}
+
+
+// =====================================================
+// CAMBIAR ESTADO AUTOR
+// =====================================================
+
+async function cambiarEstadoAutor() {
+
+    if (!autorSeleccionado) {
+        return;
+    }
+
+    const confirmar =
+        window.confirm(
+            "¿Desea cambiar el estado del autor seleccionado?"
+        );
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+
+        // Recuperamos primero los datos actuales
+        const responseActual =
+            await fetch(
+                `/api/autores/${autorSeleccionado}`
+            );
+
+        if (!responseActual.ok) {
+
+            throw new Error(
+                "No se pudo obtener el autor."
+            );
+        }
+
+        const autor =
+            await responseActual.json();
+
+
+        // Como el backend no tiene PATCH,
+        // usamos PUT conservando sus datos.
+        const datos = {
+
+            nombres:
+            autor.nombres,
+
+            apellidos:
+            autor.apellidos,
+
+            estado:
+                !autor.estado
+        };
+
+
+        const response =
+            await fetch(
+                `/api/autores/${autorSeleccionado}`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(datos)
+                }
+            );
+
+        if (!response.ok) {
+
+            let mensajeError =
+                "No se pudo cambiar el estado del autor.";
+
+            try {
+
+                const respuesta =
+                    await response.json();
+
+                if (respuesta.mensaje) {
+                    mensajeError =
+                        respuesta.mensaje;
+                }
+
+            } catch (error) {
+                // Mantener mensaje por defecto
+            }
+
+            throw new Error(
+                mensajeError
+            );
+        }
+
+        autorSeleccionado = null;
+
+        await cargarAutores();
+
+    } catch (error) {
+
+        const mensaje =
+            document.getElementById(
+                "mensajeAutores"
+            );
+
+        if (mensaje) {
+            mensaje.textContent =
+                error.message;
+        }
+    }
+}
