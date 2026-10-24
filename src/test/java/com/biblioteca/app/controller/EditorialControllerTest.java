@@ -1,4 +1,3 @@
-
 package com.biblioteca.app.controller;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -37,13 +36,13 @@ class EditorialControllerTest {
     private static final String EDITORIAL_JSON = """
             {
                 "nombre": "Editorial Planeta",
-                "pais": "España",
                 "estado": true
             }
             """;
 
     @BeforeEach
     void setUp() {
+
         mockMvc = MockMvcBuilders
                 .standaloneSetup(
                         new EditorialController(editorialService))
@@ -52,13 +51,13 @@ class EditorialControllerTest {
         editorial = new Editorial();
         editorial.setIdEditorial(1);
         editorial.setNombre("Editorial Planeta");
-        editorial.setPais("España");
         editorial.setEstado(true);
     }
 
     // 1. Listar editoriales
     @Test
     void debeListarEditoriales() throws Exception {
+
         when(editorialService.listarEditoriales())
                 .thenReturn(List.of(editorial));
 
@@ -67,8 +66,6 @@ class EditorialControllerTest {
                 .andExpect(jsonPath("$[0].idEditorial").value(1))
                 .andExpect(jsonPath("$[0].nombre")
                         .value("Editorial Planeta"))
-                .andExpect(jsonPath("$[0].pais")
-                        .value("España"))
                 .andExpect(jsonPath("$[0].estado").value(true));
 
         verify(editorialService).listarEditoriales();
@@ -77,6 +74,7 @@ class EditorialControllerTest {
     // 2. Listar editoriales sin registros
     @Test
     void debeRetornarListaVacia() throws Exception {
+
         when(editorialService.listarEditoriales())
                 .thenReturn(List.of());
 
@@ -90,6 +88,7 @@ class EditorialControllerTest {
     // 3. Buscar editorial existente
     @Test
     void debeBuscarEditorialPorId() throws Exception {
+
         when(editorialService.obtenerEditorialPorId(1))
                 .thenReturn(Optional.of(editorial));
 
@@ -98,10 +97,10 @@ class EditorialControllerTest {
                 .andExpect(jsonPath("$.idEditorial").value(1))
                 .andExpect(jsonPath("$.nombre")
                         .value("Editorial Planeta"))
-                .andExpect(jsonPath("$.pais")
-                        .value("España"));
+                .andExpect(jsonPath("$.estado").value(true));
 
-        verify(editorialService).obtenerEditorialPorId(1);
+        verify(editorialService)
+                .obtenerEditorialPorId(1);
     }
 
     // 4. Buscar editorial inexistente
@@ -115,12 +114,14 @@ class EditorialControllerTest {
         mockMvc.perform(get("/api/editoriales/999"))
                 .andExpect(status().isNotFound());
 
-        verify(editorialService).obtenerEditorialPorId(999);
+        verify(editorialService)
+                .obtenerEditorialPorId(999);
     }
 
     // 5. Registrar nueva editorial
     @Test
     void debeRegistrarEditorial() throws Exception {
+
         when(editorialService.registrarEditorial(
                 any(Editorial.class)))
                 .thenReturn(editorial);
@@ -132,22 +133,23 @@ class EditorialControllerTest {
                 .andExpect(jsonPath("$.idEditorial").value(1))
                 .andExpect(jsonPath("$.nombre")
                         .value("Editorial Planeta"))
-                .andExpect(jsonPath("$.pais")
-                        .value("España"))
                 .andExpect(jsonPath("$.estado").value(true));
 
         verify(editorialService)
-                .registrarEditorial(any(Editorial.class));
+                .registrarEditorial(
+                        any(Editorial.class));
     }
 
     // 6. Actualizar editorial existente
     @Test
     void debeActualizarEditorial() throws Exception {
-        editorial.setNombre("Editorial actualizada");
-        editorial.setPais("Peru");
+
+        editorial.setNombre(
+                "Editorial actualizada");
 
         when(editorialService.actualizarEditorial(
-                eq(1), any(Editorial.class)))
+                eq(1),
+                any(Editorial.class)))
                 .thenReturn(editorial);
 
         mockMvc.perform(put("/api/editoriales/1")
@@ -157,11 +159,12 @@ class EditorialControllerTest {
                 .andExpect(jsonPath("$.idEditorial").value(1))
                 .andExpect(jsonPath("$.nombre")
                         .value("Editorial actualizada"))
-                .andExpect(jsonPath("$.pais")
-                        .value("Peru"));
+                .andExpect(jsonPath("$.estado").value(true));
 
-        verify(editorialService).actualizarEditorial(
-                eq(1), any(Editorial.class));
+        verify(editorialService)
+                .actualizarEditorial(
+                        eq(1),
+                        any(Editorial.class));
     }
 
     // 7. Actualizar editorial inexistente
@@ -170,20 +173,27 @@ class EditorialControllerTest {
             throws Exception {
 
         when(editorialService.actualizarEditorial(
-                eq(999), any(Editorial.class)))
-                .thenThrow(new NoSuchElementException(
-                        "Editorial con ID 999 no encontrada"
-                ));
+                eq(999),
+                any(Editorial.class)))
+                .thenThrow(
+                        new NoSuchElementException(
+                                "Editorial con ID 999 no encontrada"
+                        )
+                );
 
         mockMvc.perform(put("/api/editoriales/999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(EDITORIAL_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.mensaje")
-                        .value("Editorial con ID 999 no encontrada"));
+                        .value(
+                                "Editorial con ID 999 no encontrada"
+                        ));
 
-        verify(editorialService).actualizarEditorial(
-                eq(999), any(Editorial.class));
+        verify(editorialService)
+                .actualizarEditorial(
+                        eq(999),
+                        any(Editorial.class));
     }
 
     // 8. Rechazar registro sin nombre
@@ -193,24 +203,28 @@ class EditorialControllerTest {
 
         when(editorialService.registrarEditorial(
                 any(Editorial.class)))
-                .thenThrow(new IllegalArgumentException(
-                        "El nombre de la editorial es obligatorio"
-                ));
+                .thenThrow(
+                        new IllegalArgumentException(
+                                "El nombre de la editorial es obligatorio"
+                        )
+                );
 
         mockMvc.perform(post("/api/editoriales")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                    "nombre": "",
-                                    "pais": "Peru"
+                                    "nombre": ""
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.mensaje")
-                        .value("El nombre de la editorial es obligatorio"));
+                        .value(
+                                "El nombre de la editorial es obligatorio"
+                        ));
 
         verify(editorialService)
-                .registrarEditorial(any(Editorial.class));
+                .registrarEditorial(
+                        any(Editorial.class));
     }
 
     // 9. Rechazar actualizacion con nombre vacio
@@ -219,24 +233,30 @@ class EditorialControllerTest {
             throws Exception {
 
         when(editorialService.actualizarEditorial(
-                eq(1), any(Editorial.class)))
-                .thenThrow(new IllegalArgumentException(
-                        "El nombre de la editorial es obligatorio"
-                ));
+                eq(1),
+                any(Editorial.class)))
+                .thenThrow(
+                        new IllegalArgumentException(
+                                "El nombre de la editorial es obligatorio"
+                        )
+                );
 
         mockMvc.perform(put("/api/editoriales/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                    "nombre": "   ",
-                                    "pais": "Peru"
+                                    "nombre": "   "
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.mensaje")
-                        .value("El nombre de la editorial es obligatorio"));
+                        .value(
+                                "El nombre de la editorial es obligatorio"
+                        ));
 
-        verify(editorialService).actualizarEditorial(
-                eq(1), any(Editorial.class));
+        verify(editorialService)
+                .actualizarEditorial(
+                        eq(1),
+                        any(Editorial.class));
     }
 }

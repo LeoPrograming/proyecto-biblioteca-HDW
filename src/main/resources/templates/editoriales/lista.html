@@ -1,80 +1,108 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments/head :: head('Gestión de Editoriales')}"></head>
+<head th:replace="~{fragments/head :: head('Gestión de Editoriales')}">
+</head>
 
 <body>
 
-<header th:replace="~{fragments/navbar :: navbar}"></header>
+<header th:replace="~{fragments/navbar :: navbar}">
+</header>
 
 <main class="management-container">
 
     <div class="management-header">
-        <h1>Gestión de Editoriales</h1>
+
+        <h1>
+            Gestión de Editoriales
+        </h1>
+
     </div>
+
 
     <div class="action-bar">
 
-        <button class="btn btn-blue" id="btnAgregarEditorial">
+        <button
+                class="btn btn-blue"
+                id="btnAgregarEditorial">
             Agregar
         </button>
 
-        <button class="btn btn-yellow"
+        <button
+                class="btn btn-yellow"
                 id="btnEditarEditorial"
                 disabled>
             Editar
         </button>
 
-        <button class="btn btn-red"
+        <button
+                class="btn btn-red"
                 id="btnEstadoEditorial"
                 disabled>
             Cambiar estado
         </button>
 
-        <a th:href="@{/dashboard}" class="btn btn-gray">
+        <a
+                th:href="@{/dashboard}"
+                class="btn btn-gray">
             Regresar
         </a>
 
     </div>
 
+
     <div class="usuarios-search">
 
-        <input type="text"
-               id="buscarEditorial"
-               placeholder="Buscar por nombre o país">
+        <input
+                type="text"
+                id="buscarEditorial"
+                placeholder="Buscar por nombre">
 
-        <button class="btn btn-blue" id="btnBuscarEditorial">
+        <button
+                class="btn btn-blue"
+                id="btnBuscarEditorial">
             Buscar
         </button>
 
-        <button class="btn btn-gray" id="btnLimpiarBusquedaEditorial">
+        <button
+                class="btn btn-gray"
+                id="btnLimpiarBusquedaEditorial">
             Mostrar todos
         </button>
 
     </div>
 
-    <div id="mensajeEditoriales" class="mensaje"></div>
+
+    <div
+            id="mensajeEditoriales"
+            class="mensaje">
+    </div>
+
 
     <div class="table-wrapper">
 
         <table class="management-table">
 
             <thead>
+
             <tr>
                 <th></th>
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>País</th>
                 <th>Estado</th>
             </tr>
+
             </thead>
 
             <tbody id="tablaEditoriales">
+
             <tr>
-                <td colspan="5">
+                <td colspan="4">
                     Cargando editoriales...
                 </td>
             </tr>
+
             </tbody>
 
         </table>
@@ -83,7 +111,8 @@
 
 </main>
 
-<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/app.js}">
+</script>
 
 </body>
 </html>

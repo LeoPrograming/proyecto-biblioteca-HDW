@@ -1,4 +1,3 @@
-
 package com.biblioteca.app.service;
 
 import java.util.List;
@@ -15,63 +14,108 @@ import com.biblioteca.app.repository.EditorialRepository;
 @Transactional(readOnly = true)
 public class EditorialService {
 
-    private final EditorialRepository editorialRepository;
+    private final EditorialRepository
+            editorialRepository;
 
-    public EditorialService(EditorialRepository editorialRepository) {
-        this.editorialRepository = editorialRepository;
+    public EditorialService(
+            EditorialRepository editorialRepository) {
+
+        this.editorialRepository =
+                editorialRepository;
     }
 
-    // Listar todas las editoriales
+
+    // Listar editoriales
     public List<Editorial> listarEditoriales() {
+
         return editorialRepository.findAll();
     }
 
+
     // Buscar editorial por ID
-    public Optional<Editorial> obtenerEditorialPorId(Integer id) {
+    public Optional<Editorial>
+    obtenerEditorialPorId(Integer id) {
+
         return editorialRepository.findById(id);
     }
 
-    // Registrar una nueva editorial
+
+    // Registrar editorial
     @Transactional
-    public Editorial registrarEditorial(Editorial editorial) {
+    public Editorial registrarEditorial(
+            Editorial editorial) {
+
         validarEditorial(editorial);
 
-        Editorial nuevaEditorial = new Editorial();
-        nuevaEditorial.setNombre(editorial.getNombre().trim());
-        nuevaEditorial.setPais(editorial.getPais());
-        nuevaEditorial.setEstado(
-                editorial.getEstado() != null
-                        ? editorial.getEstado() : true
+        Editorial nuevaEditorial =
+                new Editorial();
+
+        nuevaEditorial.setNombre(
+                editorial
+                        .getNombre()
+                        .trim()
         );
 
-        return editorialRepository.save(nuevaEditorial);
+        nuevaEditorial.setEstado(
+                editorial.getEstado() != null
+                        ? editorial.getEstado()
+                        : true
+        );
+
+        return editorialRepository.save(
+                nuevaEditorial
+        );
     }
 
-    // Actualizar una editorial existente
+
+    // Actualizar editorial
     @Transactional
-    public Editorial actualizarEditorial(Integer id, Editorial datos) {
-        Editorial editorial = editorialRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(
-                        "Editorial con ID " + id + " no encontrada"
-                ));
+    public Editorial actualizarEditorial(
+            Integer id,
+            Editorial datos) {
+
+        Editorial editorial =
+                editorialRepository
+                        .findById(id)
+                        .orElseThrow(() ->
+                                new NoSuchElementException(
+                                        "Editorial con ID "
+                                                + id
+                                                + " no encontrada"
+                                )
+                        );
 
         validarEditorial(datos);
 
-        editorial.setNombre(datos.getNombre().trim());
-        editorial.setPais(datos.getPais());
+        editorial.setNombre(
+                datos
+                        .getNombre()
+                        .trim()
+        );
 
         if (datos.getEstado() != null) {
-            editorial.setEstado(datos.getEstado());
+
+            editorial.setEstado(
+                    datos.getEstado()
+            );
         }
 
-        return editorialRepository.save(editorial);
+        return editorialRepository.save(
+                editorial
+        );
     }
 
-    // Validar datos obligatorios
-    private void validarEditorial(Editorial editorial) {
-        if (editorial == null
-                || editorial.getNombre() == null
-                || editorial.getNombre().isBlank()) {
+
+    // Validación
+    private void validarEditorial(
+            Editorial editorial) {
+
+        if (
+                editorial == null ||
+                        editorial.getNombre() == null ||
+                        editorial.getNombre().isBlank()
+        ) {
+
             throw new IllegalArgumentException(
                     "El nombre de la editorial es obligatorio"
             );
