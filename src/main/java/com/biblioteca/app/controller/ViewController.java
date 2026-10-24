@@ -21,6 +21,29 @@ public class ViewController {
         return "dashboard";
     }
 
+    // =========================
+    // LECTORES
+    // =========================
+
+    @GetMapping("/lectores")
+    public String lectores() {
+        return "lectores/lista";
+    }
+
+    @GetMapping("/lectores/nuevo")
+    public String nuevoLector() {
+        return "lectores/formulario";
+    }
+
+    @GetMapping("/lectores/editar")
+    public String editarLector() {
+        return "lectores/editar";
+    }
+
+    // =========================
+    // USUARIOS
+    // =========================
+
     @GetMapping("/usuarios")
     public String usuarios() {
         return "usuarios/lista";

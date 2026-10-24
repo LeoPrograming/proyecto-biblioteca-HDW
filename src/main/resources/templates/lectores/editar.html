@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Editar Lector')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="form-page">
+
+    <div class="form-card">
+
+        <h1 class="form-title">
+            Editar Lector
+        </h1>
+
+        <div
+                id="mensajeEditarLector"
+                class="form-message">
+        </div>
+
+        <form id="formEditarLector">
+
+            <input
+                    type="hidden"
+                    id="idLectorEditar">
+
+            <div class="form-grid">
+
+                <div class="form-field">
+                    <label for="dniLectorEditar">
+                        DNI
+                    </label>
+
+                    <input
+                            type="text"
+                            id="dniLectorEditar"
+                            maxlength="8"
+                            required>
+                </div>
+
+
+                <div class="form-field">
+                    <label for="usuarioLectorEditar">
+                        Usuario
+                    </label>
+
+                    <input
+                            type="text"
+                            id="usuarioLectorEditar"
+                            required>
+                </div>
+
+
+                <div class="form-field">
+                    <label for="nombresLectorEditar">
+                        Nombres
+                    </label>
+
+                    <input
+                            type="text"
+                            id="nombresLectorEditar"
+                            required>
+                </div>
+
+
+                <div class="form-field">
+                    <label for="apellidosLectorEditar">
+                        Apellidos
+                    </label>
+
+                    <input
+                            type="text"
+                            id="apellidosLectorEditar"
+                            required>
+                </div>
+
+
+                <div class="form-field">
+                    <label for="correoLectorEditar">
+                        Correo
+                    </label>
+
+                    <input
+                            type="email"
+                            id="correoLectorEditar">
+                </div>
+
+
+                <div class="form-field">
+                    <label for="telefonoLectorEditar">
+                        Teléfono
+                    </label>
+
+                    <input
+                            type="text"
+                            id="telefonoLectorEditar">
+                </div>
+
+
+                <div class="form-field">
+                    <label for="direccionLectorEditar">
+                        Dirección
+                    </label>
+
+                    <input
+                            type="text"
+                            id="direccionLectorEditar">
+                </div>
+
+
+                <div class="form-field">
+                    <label for="contrasenaLectorEditar">
+                        Nueva contraseña
+                    </label>
+
+                    <input
+                            type="password"
+                            id="contrasenaLectorEditar"
+                            placeholder="Dejar vacío para mantener la actual">
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                        type="submit"
+                        class="btn btn-blue">
+                    Guardar cambios
+                </button>
+
+                <a
+                        th:href="@{/lectores}"
+                        class="btn btn-gray">
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>
