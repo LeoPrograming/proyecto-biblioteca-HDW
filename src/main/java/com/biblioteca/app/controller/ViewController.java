@@ -81,4 +81,24 @@ public class ViewController {
         return "autores/editar";
     }
 
+
+    // =========================
+    // EDITORIALES
+    // =========================
+
+    @GetMapping("/editoriales")
+    public String editoriales() {
+        return "editoriales/lista";
+    }
+
+    @GetMapping("/editoriales/nuevo")
+    public String nuevaEditorial() {
+        return "editoriales/formulario";
+    }
+
+    @GetMapping("/editoriales/editar")
+    public String editarEditorial() {
+        return "editoriales/editar";
+    }
+
 }

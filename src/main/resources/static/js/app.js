@@ -2561,3 +2561,794 @@ async function cambiarEstadoAutor() {
         }
     }
 }
+
+// =====================================================
+// MÓDULO EDITORIALES
+// =====================================================
+
+let editorialSeleccionada = null;
+let editorialesCargadas = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const tablaEditoriales =
+        document.getElementById("tablaEditoriales");
+
+    const buscarEditorial =
+        document.getElementById("buscarEditorial");
+
+    const btnBuscarEditorial =
+        document.getElementById("btnBuscarEditorial");
+
+    const btnLimpiarBusquedaEditorial =
+        document.getElementById("btnLimpiarBusquedaEditorial");
+
+
+    // LISTADO
+    if (tablaEditoriales) {
+
+        cargarEditoriales();
+
+        if (btnBuscarEditorial) {
+
+            btnBuscarEditorial.addEventListener(
+                "click",
+                () => {
+
+                    buscarEditoriales(
+                        buscarEditorial.value.trim()
+                    );
+
+                }
+            );
+        }
+
+        if (buscarEditorial) {
+
+            buscarEditorial.addEventListener(
+                "keydown",
+                (event) => {
+
+                    if (event.key === "Enter") {
+
+                        buscarEditoriales(
+                            buscarEditorial.value.trim()
+                        );
+
+                    }
+
+                }
+            );
+        }
+
+        if (btnLimpiarBusquedaEditorial) {
+
+            btnLimpiarBusquedaEditorial.addEventListener(
+                "click",
+                () => {
+
+                    buscarEditorial.value = "";
+
+                    mostrarEditoriales(
+                        editorialesCargadas
+                    );
+
+                }
+            );
+        }
+    }
+
+
+    // AGREGAR
+    const btnAgregarEditorial =
+        document.getElementById("btnAgregarEditorial");
+
+    if (btnAgregarEditorial) {
+
+        btnAgregarEditorial.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "/editoriales/nuevo";
+
+            }
+        );
+    }
+
+
+    // EDITAR
+    const btnEditarEditorial =
+        document.getElementById("btnEditarEditorial");
+
+    if (btnEditarEditorial) {
+
+        btnEditarEditorial.addEventListener(
+            "click",
+            () => {
+
+                if (!editorialSeleccionada) {
+                    return;
+                }
+
+                localStorage.setItem(
+                    "editorialEditarId",
+                    editorialSeleccionada
+                );
+
+                window.location.href =
+                    "/editoriales/editar";
+
+            }
+        );
+    }
+
+
+    // CAMBIAR ESTADO
+    const btnEstadoEditorial =
+        document.getElementById("btnEstadoEditorial");
+
+    if (btnEstadoEditorial) {
+
+        btnEstadoEditorial.addEventListener(
+            "click",
+            cambiarEstadoEditorial
+        );
+    }
+
+
+    // FORMULARIO NUEVO
+    const formNuevaEditorial =
+        document.getElementById("formNuevaEditorial");
+
+    if (formNuevaEditorial) {
+
+        formNuevaEditorial.addEventListener(
+            "submit",
+            registrarEditorial
+        );
+    }
+
+
+    // FORMULARIO EDITAR
+    const formEditarEditorial =
+        document.getElementById("formEditarEditorial");
+
+    if (formEditarEditorial) {
+
+        cargarEditorialEditar();
+
+        formEditarEditorial.addEventListener(
+            "submit",
+            actualizarEditorial
+        );
+    }
+
+});
+
+
+// =====================================================
+// CARGAR EDITORIALES
+// =====================================================
+
+async function cargarEditoriales() {
+
+    const tabla =
+        document.getElementById("tablaEditoriales");
+
+    const mensaje =
+        document.getElementById("mensajeEditoriales");
+
+    if (!tabla) {
+        return;
+    }
+
+    editorialSeleccionada = null;
+
+    deshabilitarBotonesEditorial();
+
+    tabla.innerHTML = `
+        <tr>
+            <td colspan="5">
+                Cargando editoriales...
+            </td>
+        </tr>
+    `;
+
+    try {
+
+        const response =
+            await fetch("/api/editoriales");
+
+        if (response.status === 401) {
+
+            window.location.href =
+                "/login";
+
+            return;
+        }
+
+        if (!response.ok) {
+
+            throw new Error(
+                "No se pudieron obtener las editoriales."
+            );
+        }
+
+        editorialesCargadas =
+            await response.json();
+
+        mostrarEditoriales(
+            editorialesCargadas
+        );
+
+        if (mensaje) {
+            mensaje.textContent = "";
+        }
+
+    } catch (error) {
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    No se pudieron cargar las editoriales.
+                </td>
+            </tr>
+        `;
+
+        if (mensaje) {
+            mensaje.textContent =
+                error.message;
+        }
+
+        console.error(error);
+    }
+}
+
+
+// =====================================================
+// MOSTRAR EDITORIALES
+// =====================================================
+
+function mostrarEditoriales(editoriales) {
+
+    const tabla =
+        document.getElementById("tablaEditoriales");
+
+    if (!tabla) {
+        return;
+    }
+
+    editorialSeleccionada = null;
+
+    deshabilitarBotonesEditorial();
+
+    if (!editoriales || editoriales.length === 0) {
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    No se encontraron editoriales.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    tabla.innerHTML = "";
+
+    editoriales.forEach(editorial => {
+
+        const fila =
+            document.createElement("tr");
+
+        const estado =
+            editorial.estado
+                ? '<span class="estado-activo">Activo</span>'
+                : '<span class="estado-inactivo">Inactivo</span>';
+
+        fila.innerHTML = `
+
+            <td>
+                <input
+                    type="radio"
+                    name="editorialSeleccionada"
+                    value="${editorial.idEditorial}">
+            </td>
+
+            <td>
+                ${editorial.idEditorial ?? ""}
+            </td>
+
+            <td>
+                ${editorial.nombre ?? ""}
+            </td>
+
+            <td>
+                ${editorial.pais ?? ""}
+            </td>
+
+            <td>
+                ${estado}
+            </td>
+        `;
+
+        tabla.appendChild(fila);
+
+    });
+
+    configurarSeleccionEditorial();
+}
+
+
+// =====================================================
+// BUSCAR EDITORIALES
+// =====================================================
+
+function buscarEditoriales(texto) {
+
+    if (!texto) {
+
+        mostrarEditoriales(
+            editorialesCargadas
+        );
+
+        return;
+    }
+
+    const busqueda =
+        texto.toLowerCase();
+
+    const resultado =
+        editorialesCargadas.filter(
+            editorial => {
+
+                const nombre =
+                    (editorial.nombre ?? "")
+                        .toLowerCase();
+
+                const pais =
+                    (editorial.pais ?? "")
+                        .toLowerCase();
+
+                return (
+                    nombre.includes(busqueda) ||
+                    pais.includes(busqueda)
+                );
+
+            }
+        );
+
+    mostrarEditoriales(resultado);
+}
+
+
+// =====================================================
+// SELECCIONAR EDITORIAL
+// =====================================================
+
+function configurarSeleccionEditorial() {
+
+    const radios =
+        document.querySelectorAll(
+            'input[name="editorialSeleccionada"]'
+        );
+
+    radios.forEach(radio => {
+
+        radio.addEventListener(
+            "change",
+            () => {
+
+                editorialSeleccionada =
+                    Number(radio.value);
+
+                const btnEditar =
+                    document.getElementById(
+                        "btnEditarEditorial"
+                    );
+
+                const btnEstado =
+                    document.getElementById(
+                        "btnEstadoEditorial"
+                    );
+
+                if (btnEditar) {
+                    btnEditar.disabled = false;
+                }
+
+                if (btnEstado) {
+                    btnEstado.disabled = false;
+                }
+
+            }
+        );
+
+    });
+}
+
+
+function deshabilitarBotonesEditorial() {
+
+    const btnEditar =
+        document.getElementById(
+            "btnEditarEditorial"
+        );
+
+    const btnEstado =
+        document.getElementById(
+            "btnEstadoEditorial"
+        );
+
+    if (btnEditar) {
+        btnEditar.disabled = true;
+    }
+
+    if (btnEstado) {
+        btnEstado.disabled = true;
+    }
+}
+
+
+// =====================================================
+// REGISTRAR EDITORIAL
+// =====================================================
+
+async function registrarEditorial(event) {
+
+    event.preventDefault();
+
+    const mensaje =
+        document.getElementById(
+            "mensajeEditorialFormulario"
+        );
+
+    const datos = {
+
+        nombre:
+            document.getElementById(
+                "nombreEditorial"
+            ).value.trim(),
+
+        pais:
+            document.getElementById(
+                "paisEditorial"
+            ).value.trim(),
+
+        estado: true
+    };
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/editoriales",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(datos)
+                }
+            );
+
+        const respuesta =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                respuesta.mensaje ||
+                "No se pudo registrar la editorial."
+            );
+        }
+
+        mensaje.className =
+            "form-message success";
+
+        mensaje.textContent =
+            "Editorial registrada correctamente.";
+
+        setTimeout(() => {
+
+            window.location.href =
+                "/editoriales";
+
+        }, 700);
+
+    } catch (error) {
+
+        mensaje.className =
+            "form-message error";
+
+        mensaje.textContent =
+            error.message;
+    }
+}
+
+
+// =====================================================
+// CARGAR EDITORIAL PARA EDITAR
+// =====================================================
+
+async function cargarEditorialEditar() {
+
+    const id =
+        localStorage.getItem(
+            "editorialEditarId"
+        );
+
+    if (!id) {
+
+        window.location.href =
+            "/editoriales";
+
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/editoriales/${id}`
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "No se pudo cargar la editorial."
+            );
+        }
+
+        const editorial =
+            await response.json();
+
+        document.getElementById(
+            "idEditorialEditar"
+        ).value =
+            editorial.idEditorial ?? "";
+
+        document.getElementById(
+            "nombreEditorialEditar"
+        ).value =
+            editorial.nombre ?? "";
+
+        document.getElementById(
+            "paisEditorialEditar"
+        ).value =
+            editorial.pais ?? "";
+
+    } catch (error) {
+
+        const mensaje =
+            document.getElementById(
+                "mensajeEditarEditorial"
+            );
+
+        mensaje.className =
+            "form-message error";
+
+        mensaje.textContent =
+            error.message;
+    }
+}
+
+
+// =====================================================
+// ACTUALIZAR EDITORIAL
+// =====================================================
+
+async function actualizarEditorial(event) {
+
+    event.preventDefault();
+
+    const id =
+        document.getElementById(
+            "idEditorialEditar"
+        ).value;
+
+    const mensaje =
+        document.getElementById(
+            "mensajeEditarEditorial"
+        );
+
+    try {
+
+        const actualResponse =
+            await fetch(
+                `/api/editoriales/${id}`
+            );
+
+        if (!actualResponse.ok) {
+
+            throw new Error(
+                "No se pudo obtener la editorial."
+            );
+        }
+
+        const editorialActual =
+            await actualResponse.json();
+
+        const datos = {
+
+            nombre:
+                document.getElementById(
+                    "nombreEditorialEditar"
+                ).value.trim(),
+
+            pais:
+                document.getElementById(
+                    "paisEditorialEditar"
+                ).value.trim(),
+
+            estado:
+            editorialActual.estado
+        };
+
+
+        const response =
+            await fetch(
+                `/api/editoriales/${id}`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(datos)
+                }
+            );
+
+        const respuesta =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                respuesta.mensaje ||
+                "No se pudo actualizar la editorial."
+            );
+        }
+
+        mensaje.className =
+            "form-message success";
+
+        mensaje.textContent =
+            "Editorial actualizada correctamente.";
+
+        localStorage.removeItem(
+            "editorialEditarId"
+        );
+
+        setTimeout(() => {
+
+            window.location.href =
+                "/editoriales";
+
+        }, 700);
+
+    } catch (error) {
+
+        mensaje.className =
+            "form-message error";
+
+        mensaje.textContent =
+            error.message;
+    }
+}
+
+
+// =====================================================
+// CAMBIAR ESTADO EDITORIAL
+// =====================================================
+
+async function cambiarEstadoEditorial() {
+
+    if (!editorialSeleccionada) {
+        return;
+    }
+
+    const confirmar =
+        window.confirm(
+            "¿Desea cambiar el estado de la editorial seleccionada?"
+        );
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+
+        const responseActual =
+            await fetch(
+                `/api/editoriales/${editorialSeleccionada}`
+            );
+
+        if (!responseActual.ok) {
+
+            throw new Error(
+                "No se pudo obtener la editorial."
+            );
+        }
+
+        const editorial =
+            await responseActual.json();
+
+        const datos = {
+
+            nombre:
+            editorial.nombre,
+
+            pais:
+            editorial.pais,
+
+            estado:
+                !editorial.estado
+        };
+
+
+        const response =
+            await fetch(
+                `/api/editoriales/${editorialSeleccionada}`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(datos)
+                }
+            );
+
+        if (!response.ok) {
+
+            let mensajeError =
+                "No se pudo cambiar el estado de la editorial.";
+
+            try {
+
+                const respuesta =
+                    await response.json();
+
+                if (respuesta.mensaje) {
+                    mensajeError =
+                        respuesta.mensaje;
+                }
+
+            } catch (error) {
+                // mantener mensaje por defecto
+            }
+
+            throw new Error(
+                mensajeError
+            );
+        }
+
+        editorialSeleccionada = null;
+
+        await cargarEditoriales();
+
+    } catch (error) {
+
+        const mensaje =
+            document.getElementById(
+                "mensajeEditoriales"
+            );
+
+        if (mensaje) {
+            mensaje.textContent =
+                error.message;
+        }
+    }
+}
