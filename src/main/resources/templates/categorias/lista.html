@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Gestión de Categorías')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="management-container">
+
+    <div class="management-header">
+        <h1>Gestión de Categorías</h1>
+    </div>
+
+    <div class="action-bar">
+
+        <button
+                class="btn btn-blue"
+                id="btnAgregarCategoria">
+            Agregar
+        </button>
+
+        <button
+                class="btn btn-yellow"
+                id="btnEditarCategoria"
+                disabled>
+            Editar
+        </button>
+
+        <button
+                class="btn btn-red"
+                id="btnEstadoCategoria"
+                disabled>
+            Cambiar estado
+        </button>
+
+        <a
+                th:href="@{/dashboard}"
+                class="btn btn-gray">
+            Regresar
+        </a>
+
+    </div>
+
+    <div class="usuarios-search">
+
+        <input
+                type="text"
+                id="buscarCategoria"
+                placeholder="Buscar por nombre o descripción">
+
+        <button
+                class="btn btn-blue"
+                id="btnBuscarCategoria">
+            Buscar
+        </button>
+
+        <button
+                class="btn btn-gray"
+                id="btnLimpiarBusquedaCategoria">
+            Mostrar todos
+        </button>
+
+    </div>
+
+    <div
+            id="mensajeCategorias"
+            class="mensaje">
+    </div>
+
+    <div class="table-wrapper">
+
+        <table class="management-table">
+
+            <thead>
+
+            <tr>
+                <th></th>
+                <th>ID</th>
+                <th>Imagen</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+            </tr>
+
+            </thead>
+
+            <tbody id="tablaCategorias">
+
+            <tr>
+                <td colspan="6">
+                    Cargando categorías...
+                </td>
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>

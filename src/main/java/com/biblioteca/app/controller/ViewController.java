@@ -101,4 +101,23 @@ public class ViewController {
         return "editoriales/editar";
     }
 
+    // =========================
+// CATEGORÍAS
+// =========================
+
+    @GetMapping("/categorias")
+    public String categorias() {
+        return "categorias/lista";
+    }
+
+    @GetMapping("/categorias/nuevo")
+    public String nuevaCategoria() {
+        return "categorias/formulario";
+    }
+
+    @GetMapping("/categorias/editar")
+    public String editarCategoria() {
+        return "categorias/editar";
+    }
+
 }

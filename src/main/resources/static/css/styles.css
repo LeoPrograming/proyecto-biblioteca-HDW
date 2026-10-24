@@ -784,3 +784,53 @@ body {
     }
 
 }
+
+/* =========================================
+   IMÁGENES DE CATEGORÍAS
+   ========================================= */
+
+.categoria-imagen-celda {
+    width: 100px;
+    text-align: center;
+}
+
+.categoria-imagen {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
+    border: 1px solid #d8dee9;
+}
+
+.categoria-sin-imagen {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+/* =========================================
+   VISTA PREVIA DE CATEGORÍAS
+   ========================================= */
+
+.categoria-preview-container {
+    width: 100%;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.categoria-preview {
+    width: 180px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #d8dee9;
+    display: block;
+}
+
+.categoria-sin-imagen {
+    font-size: 14px;
+    color: #6c757d;
+}
