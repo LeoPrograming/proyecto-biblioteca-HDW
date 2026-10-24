@@ -15,9 +15,6 @@ public class Editorial {
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
-    @Column(name = "pais", length = 50)
-    private String pais;
-
     @Column(name = "estado")
     private Boolean estado;
 
@@ -26,18 +23,35 @@ public class Editorial {
 
     public Editorial() {}
 
-    public Integer getIdEditorial() { return idEditorial; }
-    public void setIdEditorial(Integer idEditorial) { this.idEditorial = idEditorial; }
+    public Integer getIdEditorial() {
+        return idEditorial;
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setIdEditorial(Integer idEditorial) {
+        this.idEditorial = idEditorial;
+    }
 
-    public String getPais() { return pais; }
-    public void setPais(String pais) { this.pais = pais; }
+    public String getNombre() {
+        return nombre;
+    }
 
-    public Boolean getEstado() { return estado; }
-    public void setEstado(Boolean estado) { this.estado = estado; }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-    public List<Libro> getLibros() { return libros; }
-    public void setLibros(List<Libro> libros) { this.libros = libros; }
+    public Boolean getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Boolean estado) {
+        this.estado = estado;
+    }
+
+    public List<Libro> getLibros() {
+        return libros;
+    }
+
+    public void setLibros(List<Libro> libros) {
+        this.libros = libros;
+    }
 }
