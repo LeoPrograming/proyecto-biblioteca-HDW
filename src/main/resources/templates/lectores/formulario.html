@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Registrar Lector')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="form-page">
+
+    <div class="form-card">
+
+        <h1 class="form-title">Registrar Lector</h1>
+
+        <div id="mensajeLectorFormulario" class="form-message"></div>
+
+        <form id="formNuevoLector">
+
+            <div class="form-grid">
+
+                <div class="form-field">
+                    <label for="dniLector">DNI</label>
+                    <input type="text" id="dniLector" required maxlength="8">
+                </div>
+
+                <div class="form-field">
+                    <label for="usuarioLector">Usuario</label>
+                    <input type="text" id="usuarioLector" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="nombresLector">Nombres</label>
+                    <input type="text" id="nombresLector" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="apellidosLector">Apellidos</label>
+                    <input type="text" id="apellidosLector" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="correoLector">Correo</label>
+                    <input type="email" id="correoLector">
+                </div>
+
+                <div class="form-field">
+                    <label for="telefonoLector">Teléfono</label>
+                    <input type="text" id="telefonoLector">
+                </div>
+
+                <div class="form-field">
+                    <label for="direccionLector">Dirección</label>
+                    <input type="text" id="direccionLector">
+                </div>
+
+                <div class="form-field">
+                    <label for="contrasenaLector">Contraseña</label>
+                    <input type="password" id="contrasenaLector" required>
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-blue">
+                    Registrar
+                </button>
+
+                <a th:href="@{/lectores}" class="btn btn-gray">
+                    Cancelar
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>
