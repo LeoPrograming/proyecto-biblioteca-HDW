@@ -3352,3 +3352,1125 @@ async function cambiarEstadoEditorial() {
         }
     }
 }
+// =====================================================
+// MÓDULO CATEGORÍAS
+// =====================================================
+
+let categoriaSeleccionada = null;
+let categoriasCargadas = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const tablaCategorias =
+        document.getElementById("tablaCategorias");
+
+    const buscarCategoria =
+        document.getElementById("buscarCategoria");
+
+    const btnBuscarCategoria =
+        document.getElementById("btnBuscarCategoria");
+
+    const btnLimpiarBusquedaCategoria =
+        document.getElementById("btnLimpiarBusquedaCategoria");
+
+    // LISTADO
+    if (tablaCategorias) {
+
+        cargarCategorias();
+
+        if (btnBuscarCategoria) {
+            btnBuscarCategoria.addEventListener(
+                "click",
+                () => {
+                    buscarCategorias(
+                        buscarCategoria.value.trim()
+                    );
+                }
+            );
+        }
+
+        if (buscarCategoria) {
+            buscarCategoria.addEventListener(
+                "keydown",
+                (event) => {
+
+                    if (event.key === "Enter") {
+                        buscarCategorias(
+                            buscarCategoria.value.trim()
+                        );
+                    }
+
+                }
+            );
+        }
+
+        if (btnLimpiarBusquedaCategoria) {
+            btnLimpiarBusquedaCategoria.addEventListener(
+                "click",
+                () => {
+
+                    buscarCategoria.value = "";
+
+                    mostrarCategorias(
+                        categoriasCargadas
+                    );
+
+                }
+            );
+        }
+    }
+
+    // AGREGAR
+    const btnAgregarCategoria =
+        document.getElementById(
+            "btnAgregarCategoria"
+        );
+
+    if (btnAgregarCategoria) {
+        btnAgregarCategoria.addEventListener(
+            "click",
+            () => {
+                window.location.href =
+                    "/categorias/nuevo";
+            }
+        );
+    }
+
+    // EDITAR
+    const btnEditarCategoria =
+        document.getElementById(
+            "btnEditarCategoria"
+        );
+
+    if (btnEditarCategoria) {
+        btnEditarCategoria.addEventListener(
+            "click",
+            () => {
+
+                if (!categoriaSeleccionada) {
+                    return;
+                }
+
+                localStorage.setItem(
+                    "categoriaEditarId",
+                    categoriaSeleccionada
+                );
+
+                window.location.href =
+                    "/categorias/editar";
+            }
+        );
+    }
+
+    // CAMBIAR ESTADO
+    const btnEstadoCategoria =
+        document.getElementById(
+            "btnEstadoCategoria"
+        );
+
+    if (btnEstadoCategoria) {
+        btnEstadoCategoria.addEventListener(
+            "click",
+            cambiarEstadoCategoria
+        );
+    }
+
+    // NUEVA CATEGORÍA
+    const formNuevaCategoria =
+        document.getElementById(
+            "formNuevaCategoria"
+        );
+
+    if (formNuevaCategoria) {
+        formNuevaCategoria.addEventListener(
+            "submit",
+            registrarCategoria
+        );
+    }
+
+    // EDITAR CATEGORÍA
+    const formEditarCategoria =
+        document.getElementById(
+            "formEditarCategoria"
+        );
+
+    if (formEditarCategoria) {
+
+        cargarCategoriaEditar();
+
+        formEditarCategoria.addEventListener(
+            "submit",
+            actualizarCategoria
+        );
+    }
+
+});
+
+
+// =====================================================
+// CARGAR CATEGORÍAS
+// =====================================================
+
+async function cargarCategorias() {
+
+    const tabla =
+        document.getElementById(
+            "tablaCategorias"
+        );
+
+    const mensaje =
+        document.getElementById(
+            "mensajeCategorias"
+        );
+
+    if (!tabla) {
+        return;
+    }
+
+    categoriaSeleccionada = null;
+
+    deshabilitarBotonesCategoria();
+
+    tabla.innerHTML = `
+        <tr>
+            <td colspan="6">
+                Cargando categorías...
+            </td>
+        </tr>
+    `;
+
+    try {
+
+        const response =
+            await fetch("/api/categorias");
+
+        if (response.status === 401) {
+
+            window.location.href =
+                "/login";
+
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                "No se pudieron obtener las categorías."
+            );
+        }
+
+        categoriasCargadas =
+            await response.json();
+
+        mostrarCategorias(
+            categoriasCargadas
+        );
+
+        if (mensaje) {
+            mensaje.textContent = "";
+        }
+
+    } catch (error) {
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    No se pudieron cargar las categorías.
+                </td>
+            </tr>
+        `;
+
+        if (mensaje) {
+            mensaje.textContent =
+                error.message;
+        }
+
+        console.error(error);
+    }
+}
+
+
+// =====================================================
+// MOSTRAR CATEGORÍAS
+// =====================================================
+
+function mostrarCategorias(categorias) {
+
+    const tabla =
+        document.getElementById(
+            "tablaCategorias"
+        );
+
+    if (!tabla) {
+        return;
+    }
+
+    categoriaSeleccionada = null;
+
+    deshabilitarBotonesCategoria();
+
+    if (!categorias || categorias.length === 0) {
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    No se encontraron categorías.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    tabla.innerHTML = "";
+
+    categorias.forEach(categoria => {
+
+        const fila =
+            document.createElement("tr");
+
+        const estado =
+            categoria.estado
+                ? '<span class="estado-activo">Activo</span>'
+                : '<span class="estado-inactivo">Inactivo</span>';
+
+        const imagen =
+            categoria.imagen
+                ? `
+                    <img
+                        src="${categoria.imagen}"
+                        alt="${categoria.nombre ?? "Categoría"}"
+                        class="categoria-imagen"
+                        onerror="
+                            this.style.display='none';
+                            this.nextElementSibling.style.display='inline';
+                        ">
+
+                    <span
+                        class="categoria-sin-imagen"
+                        style="display:none;">
+                        Sin imagen
+                    </span>
+                `
+                : `
+                    <span class="categoria-sin-imagen">
+                        Sin imagen
+                    </span>
+                `;
+
+        fila.innerHTML = `
+
+            <td>
+                <input
+                    type="radio"
+                    name="categoriaSeleccionada"
+                    value="${categoria.idCategoria}">
+            </td>
+
+            <td>
+                ${categoria.idCategoria ?? ""}
+            </td>
+
+            <td class="categoria-imagen-celda">
+                ${imagen}
+            </td>
+
+            <td>
+                ${categoria.nombre ?? ""}
+            </td>
+
+            <td>
+                ${categoria.descripcion ?? ""}
+            </td>
+
+            <td>
+                ${estado}
+            </td>
+        `;
+
+        tabla.appendChild(fila);
+
+    });
+
+    configurarSeleccionCategoria();
+}
+
+
+// =====================================================
+// BUSCAR CATEGORÍAS
+// =====================================================
+
+function buscarCategorias(texto) {
+
+    if (!texto) {
+
+        mostrarCategorias(
+            categoriasCargadas
+        );
+
+        return;
+    }
+
+    const busqueda =
+        texto.toLowerCase();
+
+    const resultado =
+        categoriasCargadas.filter(
+            categoria => {
+
+                const nombre =
+                    (categoria.nombre ?? "")
+                        .toLowerCase();
+
+                const descripcion =
+                    (categoria.descripcion ?? "")
+                        .toLowerCase();
+
+                return (
+                    nombre.includes(busqueda) ||
+                    descripcion.includes(busqueda)
+                );
+
+            }
+        );
+
+    mostrarCategorias(resultado);
+}
+
+
+// =====================================================
+// SELECCIONAR CATEGORÍA
+// =====================================================
+
+function configurarSeleccionCategoria() {
+
+    const radios =
+        document.querySelectorAll(
+            'input[name="categoriaSeleccionada"]'
+        );
+
+    radios.forEach(radio => {
+
+        radio.addEventListener(
+            "change",
+            () => {
+
+                categoriaSeleccionada =
+                    Number(radio.value);
+
+                const btnEditar =
+                    document.getElementById(
+                        "btnEditarCategoria"
+                    );
+
+                const btnEstado =
+                    document.getElementById(
+                        "btnEstadoCategoria"
+                    );
+
+                if (btnEditar) {
+                    btnEditar.disabled = false;
+                }
+
+                if (btnEstado) {
+                    btnEstado.disabled = false;
+                }
+
+            }
+        );
+
+    });
+}
+
+
+// =====================================================
+// DESHABILITAR BOTONES
+// =====================================================
+
+function deshabilitarBotonesCategoria() {
+
+    const btnEditar =
+        document.getElementById(
+            "btnEditarCategoria"
+        );
+
+    const btnEstado =
+        document.getElementById(
+            "btnEstadoCategoria"
+        );
+
+    if (btnEditar) {
+        btnEditar.disabled = true;
+    }
+
+    if (btnEstado) {
+        btnEstado.disabled = true;
+    }
+}
+
+
+// =====================================================
+// REGISTRAR CATEGORÍA
+// =====================================================
+
+async function registrarCategoria(event) {
+
+    event.preventDefault();
+
+    const mensaje =
+        document.getElementById(
+            "mensajeCategoriaFormulario"
+        );
+
+    const datos = {
+
+        nombre:
+            document.getElementById(
+                "nombreCategoria"
+            ).value.trim(),
+
+        descripcion:
+            document.getElementById(
+                "descripcionCategoria"
+            ).value.trim(),
+
+        imagen:
+            document.getElementById(
+                "imagenCategoria"
+            ).value.trim(),
+
+        estado: true
+    };
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/categorias",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(datos)
+                }
+            );
+
+        const respuesta =
+            await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                respuesta.mensaje ||
+                "No se pudo registrar la categoría."
+            );
+        }
+
+        mensaje.className =
+            "form-message success";
+
+        mensaje.textContent =
+            "Categoría registrada correctamente.";
+
+        setTimeout(() => {
+
+            window.location.href =
+                "/categorias";
+
+        }, 700);
+
+    } catch (error) {
+
+        mensaje.className =
+            "form-message error";
+
+        mensaje.textContent =
+            error.message;
+    }
+}
+
+
+// =====================================================
+// CARGAR CATEGORÍA PARA EDITAR
+// =====================================================
+
+async function cargarCategoriaEditar() {
+
+    const id =
+        localStorage.getItem(
+            "categoriaEditarId"
+        );
+
+    if (!id) {
+
+        window.location.href =
+            "/categorias";
+
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/categorias/${id}`
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "No se pudo cargar la categoría."
+            );
+        }
+
+        const categoria =
+            await response.json();
+
+
+        // ID
+        document.getElementById(
+            "idCategoriaEditar"
+        ).value =
+            categoria.idCategoria ?? "";
+
+
+        // NOMBRE
+        document.getElementById(
+            "nombreCategoriaEditar"
+        ).value =
+            categoria.nombre ?? "";
+
+
+        // DESCRIPCIÓN
+        document.getElementById(
+            "descripcionCategoriaEditar"
+        ).value =
+            categoria.descripcion ?? "";
+
+
+        // IMAGEN
+        const inputImagen =
+            document.getElementById(
+                "imagenCategoriaEditar"
+            );
+
+        inputImagen.value =
+            categoria.imagen ?? "";
+
+
+        // =========================
+        // VISTA PREVIA
+        // =========================
+
+        const preview =
+            document.getElementById(
+                "previewCategoriaEditar"
+            );
+
+        const textoPreview =
+            document.getElementById(
+                "previewCategoriaEditarTexto"
+            );
+
+
+        if (categoria.imagen) {
+
+            preview.src =
+                categoria.imagen;
+
+            preview.style.display =
+                "block";
+
+            textoPreview.style.display =
+                "none";
+
+
+            preview.onload = () => {
+
+                preview.style.display =
+                    "block";
+
+                textoPreview.style.display =
+                    "none";
+
+            };
+
+
+            preview.onerror = () => {
+
+                preview.style.display =
+                    "none";
+
+                textoPreview.style.display =
+                    "inline";
+
+                textoPreview.textContent =
+                    "No se pudo cargar la imagen";
+
+            };
+
+        } else {
+
+            preview.style.display =
+                "none";
+
+            textoPreview.style.display =
+                "inline";
+
+            textoPreview.textContent =
+                "Sin imagen";
+        }
+
+
+        // =========================
+        // ACTUALIZAR PREVIEW
+        // AL CAMBIAR LA URL
+        // =========================
+
+        inputImagen.addEventListener(
+            "input",
+            () => {
+
+                const url =
+                    inputImagen.value.trim();
+
+                if (!url) {
+
+                    preview.style.display =
+                        "none";
+
+                    textoPreview.style.display =
+                        "inline";
+
+                    textoPreview.textContent =
+                        "Sin imagen";
+
+                    return;
+                }
+
+
+                preview.src =
+                    url;
+
+                preview.style.display =
+                    "block";
+
+                textoPreview.style.display =
+                    "none";
+
+
+                preview.onload = () => {
+
+                    preview.style.display =
+                        "block";
+
+                    textoPreview.style.display =
+                        "none";
+
+                };
+
+
+                preview.onerror = () => {
+
+                    preview.style.display =
+                        "none";
+
+                    textoPreview.style.display =
+                        "inline";
+
+                    textoPreview.textContent =
+                        "No se pudo cargar la imagen";
+
+                };
+
+            }
+        );
+
+    } catch (error) {
+
+        const mensaje =
+            document.getElementById(
+                "mensajeEditarCategoria"
+            );
+
+        if (mensaje) {
+
+            mensaje.className =
+                "form-message error";
+
+            mensaje.textContent =
+                error.message;
+        }
+    }
+}
+
+
+// =====================================================
+// ACTUALIZAR CATEGORÍA
+// =====================================================
+
+async function actualizarCategoria(event) {
+
+    event.preventDefault();
+
+    const id =
+        document.getElementById(
+            "idCategoriaEditar"
+        ).value;
+
+    const mensaje =
+        document.getElementById(
+            "mensajeEditarCategoria"
+        );
+
+    try {
+
+        const actualResponse =
+            await fetch(
+                `/api/categorias/${id}`
+            );
+
+        if (!actualResponse.ok) {
+            throw new Error(
+                "No se pudo obtener la categoría."
+            );
+        }
+
+        const categoriaActual =
+            await actualResponse.json();
+
+        const datos = {
+
+            nombre:
+                document.getElementById(
+                    "nombreCategoriaEditar"
+                ).value.trim(),
+
+            descripcion:
+                document.getElementById(
+                    "descripcionCategoriaEditar"
+                ).value.trim(),
+
+            imagen:
+                document.getElementById(
+                    "imagenCategoriaEditar"
+                ).value.trim(),
+
+            estado:
+            categoriaActual.estado
+        };
+
+        const response =
+            await fetch(
+                `/api/categorias/${id}`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(datos)
+                }
+            );
+
+        const respuesta =
+            await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                respuesta.mensaje ||
+                "No se pudo actualizar la categoría."
+            );
+        }
+
+        mensaje.className =
+            "form-message success";
+
+        mensaje.textContent =
+            "Categoría actualizada correctamente.";
+
+        localStorage.removeItem(
+            "categoriaEditarId"
+        );
+
+        setTimeout(() => {
+
+            window.location.href =
+                "/categorias";
+
+        }, 700);
+
+    } catch (error) {
+
+        mensaje.className =
+            "form-message error";
+
+        mensaje.textContent =
+            error.message;
+    }
+}
+
+
+// =====================================================
+// CAMBIAR ESTADO CATEGORÍA
+// =====================================================
+
+async function cambiarEstadoCategoria() {
+
+    if (!categoriaSeleccionada) {
+        return;
+    }
+
+    const confirmar =
+        window.confirm(
+            "¿Desea cambiar el estado de la categoría seleccionada?"
+        );
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+
+        const responseActual =
+            await fetch(
+                `/api/categorias/${categoriaSeleccionada}`
+            );
+
+        if (!responseActual.ok) {
+            throw new Error(
+                "No se pudo obtener la categoría."
+            );
+        }
+
+        const categoria =
+            await responseActual.json();
+
+        const datos = {
+
+            nombre:
+            categoria.nombre,
+
+            descripcion:
+            categoria.descripcion,
+
+            imagen:
+            categoria.imagen,
+
+            estado:
+                !categoria.estado
+        };
+
+        const response =
+            await fetch(
+                `/api/categorias/${categoriaSeleccionada}`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(datos)
+                }
+            );
+
+        if (!response.ok) {
+
+            let mensajeError =
+                "No se pudo cambiar el estado de la categoría.";
+
+            try {
+
+                const respuesta =
+                    await response.json();
+
+                if (respuesta.mensaje) {
+                    mensajeError =
+                        respuesta.mensaje;
+                }
+
+            } catch (error) {
+                // Mantener mensaje por defecto
+            }
+
+            throw new Error(
+                mensajeError
+            );
+        }
+
+        categoriaSeleccionada = null;
+
+        await cargarCategorias();
+
+    } catch (error) {
+
+        const mensaje =
+            document.getElementById(
+                "mensajeCategorias"
+            );
+
+        if (mensaje) {
+            mensaje.textContent =
+                error.message;
+        }
+    }
+}
+
+// =====================================================
+// VISTA PREVIA DE IMAGEN - CATEGORÍAS
+// =====================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const inputImagenNueva =
+        document.getElementById(
+            "imagenCategoria"
+        );
+
+    const previewNueva =
+        document.getElementById(
+            "previewCategoriaNueva"
+        );
+
+    const textoPreviewNueva =
+        document.getElementById(
+            "previewCategoriaNuevaTexto"
+        );
+
+
+    if (
+        inputImagenNueva &&
+        previewNueva &&
+        textoPreviewNueva
+    ) {
+
+        inputImagenNueva.addEventListener(
+            "input",
+            () => {
+
+                actualizarPreviewCategoria(
+                    inputImagenNueva.value.trim(),
+                    previewNueva,
+                    textoPreviewNueva
+                );
+
+            }
+        );
+
+    }
+
+
+    const inputImagenEditar =
+        document.getElementById(
+            "imagenCategoriaEditar"
+        );
+
+    const previewEditar =
+        document.getElementById(
+            "previewCategoriaEditar"
+        );
+
+    const textoPreviewEditar =
+        document.getElementById(
+            "previewCategoriaEditarTexto"
+        );
+
+
+    if (
+        inputImagenEditar &&
+        previewEditar &&
+        textoPreviewEditar
+    ) {
+
+        inputImagenEditar.addEventListener(
+            "input",
+            () => {
+
+                actualizarPreviewCategoria(
+                    inputImagenEditar.value.trim(),
+                    previewEditar,
+                    textoPreviewEditar
+                );
+
+            }
+        );
+
+    }
+
+});
+
+
+// =====================================================
+// FUNCIÓN PREVIEW CATEGORÍA
+// =====================================================
+
+function actualizarPreviewCategoria(
+    url,
+    imagen,
+    texto
+) {
+
+    if (!url) {
+
+        imagen.style.display =
+            "none";
+
+        imagen.removeAttribute(
+            "src"
+        );
+
+        texto.style.display =
+            "inline";
+
+        texto.textContent =
+            "Sin imagen";
+
+        return;
+    }
+
+    texto.style.display =
+        "none";
+
+    imagen.style.display =
+        "block";
+
+    imagen.src =
+        url;
+
+
+    imagen.onload =
+        () => {
+
+            imagen.style.display =
+                "block";
+
+            texto.style.display =
+                "none";
+
+        };
+
+
+    imagen.onerror =
+        () => {
+
+            imagen.style.display =
+                "none";
+
+            texto.style.display =
+                "inline";
+
+            texto.textContent =
+                "No se pudo cargar la imagen";
+
+        };
+
+}
