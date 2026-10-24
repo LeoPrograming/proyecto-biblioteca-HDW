@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Registrar Autor')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="form-page">
+
+    <div class="form-card">
+
+        <h1 class="form-title">
+            Registrar Autor
+        </h1>
+
+        <div
+                id="mensajeAutorFormulario"
+                class="form-message">
+        </div>
+
+        <form id="formNuevoAutor">
+
+            <div class="form-grid">
+
+                <div class="form-field">
+
+                    <label for="nombresAutor">
+                        Nombres
+                    </label>
+
+                    <input
+                            type="text"
+                            id="nombresAutor"
+                            required>
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="apellidosAutor">
+                        Apellidos
+                    </label>
+
+                    <input
+                            type="text"
+                            id="apellidosAutor">
+
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+
+                <button
+                        type="submit"
+                        class="btn btn-blue">
+                    Registrar
+                </button>
+
+                <a
+                        th:href="@{/autores}"
+                        class="btn btn-gray">
+                    Cancelar
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>

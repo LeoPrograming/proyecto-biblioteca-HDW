@@ -21,6 +21,7 @@ public class ViewController {
         return "dashboard";
     }
 
+
     // =========================
     // LECTORES
     // =========================
@@ -40,6 +41,7 @@ public class ViewController {
         return "lectores/editar";
     }
 
+
     // =========================
     // USUARIOS
     // =========================
@@ -58,4 +60,25 @@ public class ViewController {
     public String editarUsuario() {
         return "usuarios/editar";
     }
+
+
+    // =========================
+    // AUTORES
+    // =========================
+
+    @GetMapping("/autores")
+    public String autores() {
+        return "autores/lista";
+    }
+
+    @GetMapping("/autores/nuevo")
+    public String nuevoAutor() {
+        return "autores/formulario";
+    }
+
+    @GetMapping("/autores/editar")
+    public String editarAutor() {
+        return "autores/editar";
+    }
+
 }
