@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Editar Libro')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="management-container">
+
+    <div class="management-header">
+        <h1>Editar Libro</h1>
+    </div>
+
+    <form id="formEditarLibro">
+
+        <input
+                type="hidden"
+                id="idLibroEditar">
+
+        <div class="form-group">
+
+            <label for="tituloLibroEditar">
+                Título
+            </label>
+
+            <input
+                    type="text"
+                    id="tituloLibroEditar"
+                    maxlength="250"
+                    required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="isbnLibroEditar">
+                ISBN
+            </label>
+
+            <input
+                    type="text"
+                    id="isbnLibroEditar"
+                    maxlength="20"
+                    required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="fechaPublicLibroEditar">
+                Fecha de publicación
+            </label>
+
+            <input
+                    type="date"
+                    id="fechaPublicLibroEditar">
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="precioTiempoLibroEditar">
+                Precio por tiempo
+            </label>
+
+            <input
+                    type="number"
+                    id="precioTiempoLibroEditar"
+                    min="0"
+                    step="0.01"
+                    required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="categoriaLibroEditar">
+                Categoría
+            </label>
+
+            <select
+                    id="categoriaLibroEditar"
+                    required>
+
+                <option value="">
+                    Seleccione una categoría
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="editorialLibroEditar">
+                Editorial
+            </label>
+
+            <select id="editorialLibroEditar">
+
+                <option value="">
+                    Sin editorial
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="autoresLibroEditar">
+                Autor(es)
+            </label>
+
+            <select
+                    id="autoresLibroEditar"
+                    multiple
+                    size="6">
+            </select>
+
+            <small>
+                Puede seleccionar varios autores manteniendo presionada la tecla Ctrl.
+            </small>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="imagenLibroEditar">
+                URL de imagen
+            </label>
+
+            <input
+                    type="url"
+                    id="imagenLibroEditar"
+                    placeholder="https://...">
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Vista previa</label>
+
+            <div>
+
+                <img
+                        id="previewLibroEditar"
+                        alt="Vista previa"
+                        style="
+                            display:none;
+                            max-width:140px;
+                            max-height:180px;
+                            object-fit:cover;
+                        ">
+
+                <span id="previewLibroEditarTexto">
+                    Sin imagen
+                </span>
+
+            </div>
+
+        </div>
+
+        <div
+                id="mensajeEditarLibro"
+                class="form-message">
+        </div>
+
+        <div class="action-bar">
+
+            <button
+                    type="submit"
+                    class="btn btn-blue">
+                Guardar cambios
+            </button>
+
+            <a
+                    th:href="@{/libros}"
+                    class="btn btn-gray">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>

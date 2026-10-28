@@ -4658,3 +4658,1281 @@ function actualizarPreviewCategoria(
         };
 
 }
+
+// =====================================================
+// MÓDULO LIBROS
+// =====================================================
+
+let libroSeleccionado = null;
+let librosCargados = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const tablaLibros =
+        document.getElementById("tablaLibros");
+
+    const buscarLibro =
+        document.getElementById("buscarLibro");
+
+    const btnBuscarLibro =
+        document.getElementById("btnBuscarLibro");
+
+    const btnLimpiarBusquedaLibro =
+        document.getElementById(
+            "btnLimpiarBusquedaLibro"
+        );
+
+    // =========================
+    // LISTADO
+    // =========================
+
+    if (tablaLibros) {
+
+        cargarLibros();
+
+        if (btnBuscarLibro) {
+
+            btnBuscarLibro.addEventListener(
+                "click",
+                () => {
+                    buscarLibros(
+                        buscarLibro.value.trim()
+                    );
+                }
+            );
+        }
+
+        if (buscarLibro) {
+
+            buscarLibro.addEventListener(
+                "keydown",
+                event => {
+
+                    if (event.key === "Enter") {
+
+                        buscarLibros(
+                            buscarLibro.value.trim()
+                        );
+                    }
+                }
+            );
+        }
+
+        if (btnLimpiarBusquedaLibro) {
+
+            btnLimpiarBusquedaLibro.addEventListener(
+                "click",
+                () => {
+
+                    buscarLibro.value = "";
+
+                    mostrarLibros(
+                        librosCargados
+                    );
+                }
+            );
+        }
+    }
+
+    // =========================
+    // AGREGAR
+    // =========================
+
+    const btnAgregarLibro =
+        document.getElementById(
+            "btnAgregarLibro"
+        );
+
+    if (btnAgregarLibro) {
+
+        btnAgregarLibro.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "/libros/nuevo";
+            }
+        );
+    }
+
+    // =========================
+    // EDITAR
+    // =========================
+
+    const btnEditarLibro =
+        document.getElementById(
+            "btnEditarLibro"
+        );
+
+    if (btnEditarLibro) {
+
+        btnEditarLibro.addEventListener(
+            "click",
+            () => {
+
+                if (!libroSeleccionado) {
+                    return;
+                }
+
+                localStorage.setItem(
+                    "libroEditarId",
+                    libroSeleccionado
+                );
+
+                window.location.href =
+                    "/libros/editar";
+            }
+        );
+    }
+
+    // =========================
+    // ESTADO
+    // =========================
+
+    const btnEstadoLibro =
+        document.getElementById(
+            "btnEstadoLibro"
+        );
+
+    if (btnEstadoLibro) {
+
+        btnEstadoLibro.addEventListener(
+            "click",
+            cambiarEstadoLibro
+        );
+    }
+
+    // =========================
+    // NUEVO
+    // =========================
+
+    const formNuevoLibro =
+        document.getElementById(
+            "formNuevoLibro"
+        );
+
+    if (formNuevoLibro) {
+
+        cargarCombosLibro(
+            "categoriaLibro",
+            "editorialLibro",
+            "autoresLibro"
+        );
+
+        configurarPreviewLibro(
+            "imagenLibro",
+            "previewLibroNuevo",
+            "previewLibroNuevoTexto"
+        );
+
+        formNuevoLibro.addEventListener(
+            "submit",
+            registrarLibro
+        );
+    }
+
+    // =========================
+    // EDITAR
+    // =========================
+
+    const formEditarLibro =
+        document.getElementById(
+            "formEditarLibro"
+        );
+
+    if (formEditarLibro) {
+
+        cargarLibroEditar();
+
+        configurarPreviewLibro(
+            "imagenLibroEditar",
+            "previewLibroEditar",
+            "previewLibroEditarTexto"
+        );
+
+        formEditarLibro.addEventListener(
+            "submit",
+            actualizarLibro
+        );
+    }
+
+});
+
+
+// =====================================================
+// CARGAR LIBROS
+// =====================================================
+
+async function cargarLibros() {
+
+    const tabla =
+        document.getElementById(
+            "tablaLibros"
+        );
+
+    if (!tabla) {
+        return;
+    }
+
+    libroSeleccionado = null;
+    deshabilitarBotonesLibro();
+
+    tabla.innerHTML = `
+        <tr>
+            <td colspan="11">
+                Cargando libros...
+            </td>
+        </tr>
+    `;
+
+    try {
+
+        const response =
+            await fetch("/api/libros");
+
+        if (!response.ok) {
+
+            throw new Error(
+                "No se pudieron obtener los libros."
+            );
+        }
+
+        librosCargados =
+            await response.json();
+
+        await enriquecerLibros();
+
+        mostrarLibros(
+            librosCargados
+        );
+
+    } catch (error) {
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="11">
+                    ${error.message}
+                </td>
+            </tr>
+        `;
+    }
+}
+
+
+// =====================================================
+// NOMBRES CATEGORÍA / EDITORIAL
+// =====================================================
+
+async function enriquecerLibros() {
+
+    try {
+
+        const [
+            categoriasResponse,
+            editorialesResponse
+        ] = await Promise.all([
+            fetch("/api/categorias"),
+            fetch("/api/editoriales")
+        ]);
+
+        const categorias =
+            categoriasResponse.ok
+                ? await categoriasResponse.json()
+                : [];
+
+        const editoriales =
+            editorialesResponse.ok
+                ? await editorialesResponse.json()
+                : [];
+
+        librosCargados =
+            librosCargados.map(libro => {
+
+                const categoria =
+                    categorias.find(
+                        item =>
+                            Number(item.idCategoria) ===
+                            Number(libro.idCategoria)
+                    );
+
+                const editorial =
+                    editoriales.find(
+                        item =>
+                            Number(item.idEditorial) ===
+                            Number(libro.idEditorial)
+                    );
+
+                return {
+                    ...libro,
+
+                    nombreCategoria:
+                        categoria?.nombre ??
+                        "Sin categoría",
+
+                    nombreEditorial:
+                        editorial?.nombre ??
+                        "Sin editorial"
+                };
+            });
+
+    } catch (error) {
+
+        console.error(
+            "No se pudieron cargar datos auxiliares.",
+            error
+        );
+    }
+}
+
+
+// =====================================================
+// MOSTRAR LIBROS
+// =====================================================
+
+function mostrarLibros(libros) {
+
+    const tabla =
+        document.getElementById(
+            "tablaLibros"
+        );
+
+    if (!tabla) {
+        return;
+    }
+
+    libroSeleccionado = null;
+    deshabilitarBotonesLibro();
+
+    if (!libros || libros.length === 0) {
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="11">
+                    No se encontraron libros.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    tabla.innerHTML = "";
+
+    libros.forEach(libro => {
+
+        const fila =
+            document.createElement("tr");
+
+        const estado =
+            libro.estado
+                ? '<span class="estado-activo">Disponible</span>'
+                : '<span class="estado-inactivo">No disponible</span>';
+
+        const imagen =
+            libro.imagen
+                ? `
+                    <img
+                        src="${libro.imagen}"
+                        alt="${libro.titulo ?? "Libro"}"
+                        class="categoria-imagen"
+                        onerror="
+                            this.style.display='none';
+                            this.nextElementSibling.style.display='inline';
+                        ">
+
+                    <span
+                        class="categoria-sin-imagen"
+                        style="display:none;">
+                        Sin imagen
+                    </span>
+                `
+                : `
+                    <span class="categoria-sin-imagen">
+                        Sin imagen
+                    </span>
+                `;
+
+        const autores =
+            libro.autores &&
+            libro.autores.length > 0
+                ? libro.autores
+                    .map(
+                        autor =>
+                            `${autor.nombres ?? ""} ${autor.apellidos ?? ""}`
+                    )
+                    .join(", ")
+                : "Sin autor";
+
+        fila.innerHTML = `
+
+            <td>
+                <input
+                    type="radio"
+                    name="libroSeleccionado"
+                    value="${libro.idLibro}">
+            </td>
+
+            <td>
+                ${libro.idLibro ?? ""}
+            </td>
+
+            <td class="categoria-imagen-celda">
+                ${imagen}
+            </td>
+
+            <td>
+                ${libro.titulo ?? ""}
+            </td>
+
+            <td>
+                ${libro.isbn ?? ""}
+            </td>
+
+            <td>
+                ${libro.fechaPublic ?? "-"}
+            </td>
+
+            <td>
+                S/ ${Number(
+            libro.precioTiempo ?? 0
+        ).toFixed(2)}
+            </td>
+
+            <td>
+                ${libro.nombreCategoria ?? ""}
+            </td>
+
+            <td>
+                ${libro.nombreEditorial ?? ""}
+            </td>
+
+            <td>
+                ${autores}
+            </td>
+
+            <td>
+                ${estado}
+            </td>
+        `;
+
+        tabla.appendChild(fila);
+    });
+
+    configurarSeleccionLibro();
+}
+
+
+// =====================================================
+// BUSCAR
+// =====================================================
+
+function buscarLibros(texto) {
+
+    if (!texto) {
+
+        mostrarLibros(
+            librosCargados
+        );
+
+        return;
+    }
+
+    const busqueda =
+        texto.toLowerCase();
+
+    const resultado =
+        librosCargados.filter(
+            libro => {
+
+                const titulo =
+                    (libro.titulo ?? "")
+                        .toLowerCase();
+
+                const isbn =
+                    (libro.isbn ?? "")
+                        .toLowerCase();
+
+                return (
+                    titulo.includes(busqueda) ||
+                    isbn.includes(busqueda)
+                );
+            }
+        );
+
+    mostrarLibros(resultado);
+}
+
+
+// =====================================================
+// SELECCIÓN
+// =====================================================
+
+function configurarSeleccionLibro() {
+
+    const radios =
+        document.querySelectorAll(
+            'input[name="libroSeleccionado"]'
+        );
+
+    radios.forEach(radio => {
+
+        radio.addEventListener(
+            "change",
+            () => {
+
+                libroSeleccionado =
+                    Number(radio.value);
+
+                const btnEditar =
+                    document.getElementById(
+                        "btnEditarLibro"
+                    );
+
+                const btnEstado =
+                    document.getElementById(
+                        "btnEstadoLibro"
+                    );
+
+                if (btnEditar) {
+                    btnEditar.disabled = false;
+                }
+
+                if (btnEstado) {
+                    btnEstado.disabled = false;
+                }
+            }
+        );
+    });
+}
+
+
+function deshabilitarBotonesLibro() {
+
+    const btnEditar =
+        document.getElementById(
+            "btnEditarLibro"
+        );
+
+    const btnEstado =
+        document.getElementById(
+            "btnEstadoLibro"
+        );
+
+    if (btnEditar) {
+        btnEditar.disabled = true;
+    }
+
+    if (btnEstado) {
+        btnEstado.disabled = true;
+    }
+}
+
+
+// =====================================================
+// COMBOS
+// =====================================================
+
+async function cargarCombosLibro(
+    categoriaId,
+    editorialId,
+    autoresId
+) {
+
+    const categoriaSelect =
+        document.getElementById(
+            categoriaId
+        );
+
+    const editorialSelect =
+        document.getElementById(
+            editorialId
+        );
+
+    const autoresSelect =
+        document.getElementById(
+            autoresId
+        );
+
+    const [
+        categoriasResponse,
+        editorialesResponse,
+        autoresResponse
+    ] = await Promise.all([
+        fetch("/api/categorias"),
+        fetch("/api/editoriales"),
+        fetch("/api/autores")
+    ]);
+
+    const categorias =
+        await categoriasResponse.json();
+
+    const editoriales =
+        await editorialesResponse.json();
+
+    const autores =
+        await autoresResponse.json();
+
+    if (categoriaSelect) {
+
+        categorias
+            .filter(item => item.estado !== false)
+            .forEach(categoria => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    categoria.idCategoria;
+
+                option.textContent =
+                    categoria.nombre;
+
+                categoriaSelect.appendChild(
+                    option
+                );
+            });
+    }
+
+    if (editorialSelect) {
+
+        editoriales
+            .filter(item => item.estado !== false)
+            .forEach(editorial => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    editorial.idEditorial;
+
+                option.textContent =
+                    editorial.nombre;
+
+                editorialSelect.appendChild(
+                    option
+                );
+            });
+    }
+
+    if (autoresSelect) {
+
+        autores
+            .filter(item => item.estado !== false)
+            .forEach(autor => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    autor.idAutor;
+
+                option.textContent =
+                    `${autor.nombres ?? ""} ${autor.apellidos ?? ""}`;
+
+                autoresSelect.appendChild(
+                    option
+                );
+            });
+    }
+}
+
+
+// =====================================================
+// REGISTRAR
+// =====================================================
+
+async function registrarLibro(event) {
+
+    event.preventDefault();
+
+    const mensaje =
+        document.getElementById(
+            "mensajeLibroFormulario"
+        );
+
+    const autores =
+        Array.from(
+            document.getElementById(
+                "autoresLibro"
+            ).selectedOptions
+        ).map(
+            option => ({
+                idAutor:
+                    Number(option.value)
+            })
+        );
+
+    const categoria =
+        Number(
+            document.getElementById(
+                "categoriaLibro"
+            ).value
+        );
+
+    const editorialValor =
+        document.getElementById(
+            "editorialLibro"
+        ).value;
+
+    const datos = {
+
+        titulo:
+            document.getElementById(
+                "tituloLibro"
+            ).value.trim(),
+
+        isbn:
+            document.getElementById(
+                "isbnLibro"
+            ).value.trim(),
+
+        fechaPublic:
+            document.getElementById(
+                "fechaPublicLibro"
+            ).value || null,
+
+        precioTiempo:
+            Number(
+                document.getElementById(
+                    "precioTiempoLibro"
+                ).value
+            ),
+
+        imagen:
+            document.getElementById(
+                "imagenLibro"
+            ).value.trim() || null,
+
+        estado: true,
+
+        categoria: {
+            idCategoria: categoria
+        },
+
+        editorial:
+            editorialValor
+                ? {
+                    idEditorial:
+                        Number(editorialValor)
+                }
+                : null,
+
+        autores: autores
+    };
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/libros",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(datos)
+                }
+            );
+
+        const respuesta =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                respuesta.mensaje ||
+                "No se pudo registrar el libro."
+            );
+        }
+
+        mensaje.className =
+            "form-message success";
+
+        mensaje.textContent =
+            "Libro registrado correctamente.";
+
+        setTimeout(() => {
+
+            window.location.href =
+                "/libros";
+
+        }, 700);
+
+    } catch (error) {
+
+        mensaje.className =
+            "form-message error";
+
+        mensaje.textContent =
+            error.message;
+    }
+}
+
+
+// =====================================================
+// CARGAR LIBRO PARA EDITAR
+// =====================================================
+
+async function cargarLibroEditar() {
+
+    const id =
+        localStorage.getItem(
+            "libroEditarId"
+        );
+
+    if (!id) {
+
+        window.location.href =
+            "/libros";
+
+        return;
+    }
+
+    try {
+
+        await cargarCombosLibro(
+            "categoriaLibroEditar",
+            "editorialLibroEditar",
+            "autoresLibroEditar"
+        );
+
+        const response =
+            await fetch(
+                `/api/libros/${id}`
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "No se pudo cargar el libro."
+            );
+        }
+
+        const libro =
+            await response.json();
+
+        document.getElementById(
+            "idLibroEditar"
+        ).value =
+            libro.idLibro;
+
+        document.getElementById(
+            "tituloLibroEditar"
+        ).value =
+            libro.titulo ?? "";
+
+        document.getElementById(
+            "isbnLibroEditar"
+        ).value =
+            libro.isbn ?? "";
+
+        document.getElementById(
+            "fechaPublicLibroEditar"
+        ).value =
+            libro.fechaPublic ?? "";
+
+        document.getElementById(
+            "precioTiempoLibroEditar"
+        ).value =
+            libro.precioTiempo ?? 0;
+
+        document.getElementById(
+            "imagenLibroEditar"
+        ).value =
+            libro.imagen ?? "";
+
+        document.getElementById(
+            "categoriaLibroEditar"
+        ).value =
+            libro.idCategoria ?? "";
+
+        document.getElementById(
+            "editorialLibroEditar"
+        ).value =
+            libro.idEditorial ?? "";
+
+        const idsAutores =
+            (libro.autores ?? [])
+                .map(
+                    autor =>
+                        Number(
+                            autor.idAutor
+                        )
+                );
+
+        const selectAutores =
+            document.getElementById(
+                "autoresLibroEditar"
+            );
+
+        Array.from(
+            selectAutores.options
+        ).forEach(option => {
+
+            option.selected =
+                idsAutores.includes(
+                    Number(option.value)
+                );
+        });
+
+        actualizarPreviewLibro(
+            libro.imagen,
+            document.getElementById(
+                "previewLibroEditar"
+            ),
+            document.getElementById(
+                "previewLibroEditarTexto"
+            )
+        );
+
+    } catch (error) {
+
+        const mensaje =
+            document.getElementById(
+                "mensajeEditarLibro"
+            );
+
+        mensaje.className =
+            "form-message error";
+
+        mensaje.textContent =
+            error.message;
+    }
+}
+
+
+// =====================================================
+// ACTUALIZAR
+// =====================================================
+
+async function actualizarLibro(event) {
+
+    event.preventDefault();
+
+    const id =
+        document.getElementById(
+            "idLibroEditar"
+        ).value;
+
+    const mensaje =
+        document.getElementById(
+            "mensajeEditarLibro"
+        );
+
+    const actualResponse =
+        await fetch(
+            `/api/libros/${id}`
+        );
+
+    const libroActual =
+        await actualResponse.json();
+
+    const autores =
+        Array.from(
+            document.getElementById(
+                "autoresLibroEditar"
+            ).selectedOptions
+        ).map(
+            option => ({
+                idAutor:
+                    Number(option.value)
+            })
+        );
+
+    const editorialValor =
+        document.getElementById(
+            "editorialLibroEditar"
+        ).value;
+
+    const datos = {
+
+        titulo:
+            document.getElementById(
+                "tituloLibroEditar"
+            ).value.trim(),
+
+        isbn:
+            document.getElementById(
+                "isbnLibroEditar"
+            ).value.trim(),
+
+        fechaPublic:
+            document.getElementById(
+                "fechaPublicLibroEditar"
+            ).value || null,
+
+        precioTiempo:
+            Number(
+                document.getElementById(
+                    "precioTiempoLibroEditar"
+                ).value
+            ),
+
+        imagen:
+            document.getElementById(
+                "imagenLibroEditar"
+            ).value.trim() || null,
+
+        estado:
+        libroActual.estado,
+
+        categoria: {
+            idCategoria:
+                Number(
+                    document.getElementById(
+                        "categoriaLibroEditar"
+                    ).value
+                )
+        },
+
+        editorial:
+            editorialValor
+                ? {
+                    idEditorial:
+                        Number(editorialValor)
+                }
+                : null,
+
+        autores: autores
+    };
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/libros/${id}`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(datos)
+                }
+            );
+
+        const respuesta =
+            await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                respuesta.mensaje ||
+                "No se pudo actualizar el libro."
+            );
+        }
+
+        mensaje.className =
+            "form-message success";
+
+        mensaje.textContent =
+            "Libro actualizado correctamente.";
+
+        localStorage.removeItem(
+            "libroEditarId"
+        );
+
+        setTimeout(() => {
+
+            window.location.href =
+                "/libros";
+
+        }, 700);
+
+    } catch (error) {
+
+        mensaje.className =
+            "form-message error";
+
+        mensaje.textContent =
+            error.message;
+    }
+}
+
+
+// =====================================================
+// CAMBIAR ESTADO
+// =====================================================
+
+async function cambiarEstadoLibro() {
+
+    if (!libroSeleccionado) {
+        return;
+    }
+
+    const confirmar =
+        window.confirm(
+            "¿Desea cambiar la disponibilidad del libro seleccionado?"
+        );
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+
+        const actualResponse =
+            await fetch(
+                `/api/libros/${libroSeleccionado}`
+            );
+
+        if (!actualResponse.ok) {
+
+            throw new Error(
+                "No se pudo obtener el libro."
+            );
+        }
+
+        const libro =
+            await actualResponse.json();
+
+        const response =
+            await fetch(
+                `/api/libros/${libroSeleccionado}/estado`,
+                {
+                    method: "PATCH",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            estado:
+                                !libro.estado
+                        })
+                }
+            );
+
+        if (!response.ok) {
+
+            const respuesta =
+                await response.json();
+
+            throw new Error(
+                respuesta.mensaje ||
+                "No se pudo cambiar el estado."
+            );
+        }
+
+        libroSeleccionado = null;
+
+        await cargarLibros();
+
+    } catch (error) {
+
+        const mensaje =
+            document.getElementById(
+                "mensajeLibros"
+            );
+
+        if (mensaje) {
+
+            mensaje.textContent =
+                error.message;
+        }
+    }
+}
+
+
+// =====================================================
+// PREVIEW IMAGEN
+// =====================================================
+
+function configurarPreviewLibro(
+    inputId,
+    previewId,
+    textoId
+) {
+
+    const input =
+        document.getElementById(
+            inputId
+        );
+
+    const preview =
+        document.getElementById(
+            previewId
+        );
+
+    const texto =
+        document.getElementById(
+            textoId
+        );
+
+    if (!input || !preview || !texto) {
+        return;
+    }
+
+    input.addEventListener(
+        "input",
+        () => {
+
+            actualizarPreviewLibro(
+                input.value.trim(),
+                preview,
+                texto
+            );
+        }
+    );
+}
+
+
+function actualizarPreviewLibro(
+    url,
+    imagen,
+    texto
+) {
+
+    if (!url) {
+
+        imagen.style.display =
+            "none";
+
+        imagen.removeAttribute(
+            "src"
+        );
+
+        texto.style.display =
+            "inline";
+
+        return;
+    }
+
+    imagen.src = url;
+
+    imagen.style.display =
+        "block";
+
+    texto.style.display =
+        "none";
+
+    imagen.onerror = () => {
+
+        imagen.style.display =
+            "none";
+
+        texto.style.display =
+            "inline";
+
+        texto.textContent =
+            "No se pudo cargar la imagen.";
+    };
+
+    imagen.onload = () => {
+
+        imagen.style.display =
+            "block";
+
+        texto.style.display =
+            "none";
+    };
+}

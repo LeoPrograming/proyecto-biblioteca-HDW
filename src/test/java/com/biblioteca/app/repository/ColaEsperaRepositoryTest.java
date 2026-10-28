@@ -12,7 +12,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
-
+import com.biblioteca.app.model.Categoria;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -54,13 +54,38 @@ class ColaEsperaRepositoryTest {
         return usuario;
     }
 
+    private Categoria crearCategoria() {
+
+        Categoria categoria = new Categoria();
+
+        categoria.setNombre(
+                "Categoria Test Cola " + System.nanoTime()
+        );
+
+        categoria.setDescripcion(
+                "Categoria para pruebas"
+        );
+
+        categoria.setEstado(true);
+
+        entityManager.persist(categoria);
+        entityManager.flush();
+
+        return categoria;
+    }
     private Libro crearLibro(String isbn, String titulo) {
+
+        Categoria categoria = crearCategoria();
+
         Libro libro = new Libro();
+
         libro.setTitulo(titulo);
         libro.setIsbn(isbn);
-        libro.setStock(0);
-        libro.setPrecio(20.0);
+        libro.setPrecioTiempo(
+                new java.math.BigDecimal("20.00")
+        );
         libro.setEstado(false);
+        libro.setCategoria(categoria);
 
         entityManager.persist(libro);
         entityManager.flush();
