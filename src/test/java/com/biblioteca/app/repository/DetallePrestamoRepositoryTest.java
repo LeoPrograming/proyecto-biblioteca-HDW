@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.test.context.ActiveProfiles;
-
+import com.biblioteca.app.model.Categoria;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -69,14 +69,35 @@ class DetallePrestamoRepositoryTest {
 
         return comprobante;
     }
+    private Categoria crearCategoria() {
+
+        Categoria categoria = new Categoria();
+
+        categoria.setNombre("Categoria Test Detalle");
+        categoria.setDescripcion("Categoria para pruebas");
+        categoria.setEstado(true);
+
+        entityManager.persist(categoria);
+        entityManager.flush();
+
+        return categoria;
+    }
 
     private Libro crearLibro() {
+
+        Categoria categoria = crearCategoria();
+
         Libro libro = new Libro();
+
         libro.setTitulo("Libro de prueba");
         libro.setIsbn("ISBN-TEST-001");
-        libro.setStock(5);
-        libro.setPrecio(10.0);
+
+        libro.setPrecioTiempo(
+                new BigDecimal("10.00")
+        );
+
         libro.setEstado(true);
+        libro.setCategoria(categoria);
 
         entityManager.persist(libro);
         entityManager.flush();

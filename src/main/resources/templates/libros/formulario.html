@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Registrar Libro')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="management-container">
+
+    <div class="management-header">
+        <h1>Registrar Libro</h1>
+    </div>
+
+    <form id="formNuevoLibro">
+
+        <div class="form-group">
+            <label for="tituloLibro">Título</label>
+            <input
+                    type="text"
+                    id="tituloLibro"
+                    maxlength="250"
+                    required>
+        </div>
+
+        <div class="form-group">
+            <label for="isbnLibro">ISBN</label>
+            <input
+                    type="text"
+                    id="isbnLibro"
+                    maxlength="20"
+                    required>
+        </div>
+
+        <div class="form-group">
+            <label for="fechaPublicLibro">
+                Fecha de publicación
+            </label>
+
+            <input
+                    type="date"
+                    id="fechaPublicLibro">
+        </div>
+
+        <div class="form-group">
+            <label for="precioTiempoLibro">
+                Precio por tiempo
+            </label>
+
+            <input
+                    type="number"
+                    id="precioTiempoLibro"
+                    min="0"
+                    step="0.01"
+                    value="0.00"
+                    required>
+        </div>
+
+        <div class="form-group">
+            <label for="categoriaLibro">
+                Categoría
+            </label>
+
+            <select
+                    id="categoriaLibro"
+                    required>
+
+                <option value="">
+                    Seleccione una categoría
+                </option>
+
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="editorialLibro">
+                Editorial
+            </label>
+
+            <select id="editorialLibro">
+
+                <option value="">
+                    Sin editorial
+                </option>
+
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="autoresLibro">
+                Autor(es)
+            </label>
+
+            <select
+                    id="autoresLibro"
+                    multiple
+                    size="6">
+            </select>
+
+            <small>
+                Puede seleccionar varios autores manteniendo presionada la tecla Ctrl.
+            </small>
+        </div>
+
+        <div class="form-group">
+
+            <label for="imagenLibro">
+                URL de imagen
+            </label>
+
+            <input
+                    type="url"
+                    id="imagenLibro"
+                    placeholder="https://...">
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Vista previa</label>
+
+            <div>
+
+                <img
+                        id="previewLibroNuevo"
+                        alt="Vista previa"
+                        style="
+                            display:none;
+                            max-width:140px;
+                            max-height:180px;
+                            object-fit:cover;
+                        ">
+
+                <span id="previewLibroNuevoTexto">
+                    Sin imagen
+                </span>
+
+            </div>
+
+        </div>
+
+        <div
+                id="mensajeLibroFormulario"
+                class="form-message">
+        </div>
+
+        <div class="action-bar">
+
+            <button
+                    type="submit"
+                    class="btn btn-blue">
+                Guardar
+            </button>
+
+            <a
+                    th:href="@{/libros}"
+                    class="btn btn-gray">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+</html>

@@ -48,13 +48,13 @@ public class PrestamoServiceTest {
 
     @BeforeEach
     void setUp() {
+
         usuarioMock = new Usuario();
         usuarioMock.setIdUsuario(1);
 
         libroMock = new Libro();
         libroMock.setIdLibro(1);
-        libroMock.setEstado(true); // true = disponible
-        libroMock.setStock(5); // Le damos un stock inicial
+        libroMock.setEstado(true);
 
         prestamoMock = new Prestamo();
         prestamoMock.setIdPrestamo(1);
@@ -70,32 +70,70 @@ public class PrestamoServiceTest {
 
     @Test
     void registrarDevolucion_ExitosaYCierraPrestamo() {
-        when(detallePrestamoRepository.findById(1)).thenReturn(Optional.of(detalleMock));
-        when(detallePrestamoRepository.findByPrestamo_IdPrestamo(1)).thenReturn(List.of(detalleMock));
 
-        DetallePrestamo resultado = prestamoService.registrarDevolucion(1);
+        when(detallePrestamoRepository.findById(1))
+                .thenReturn(Optional.of(detalleMock));
 
-        assertEquals("devuelto", resultado.getEstado());
-        assertEquals(LocalDate.now(), resultado.getFechaDevolucion());
-        assertTrue(libroMock.getEstado()); // Verificamos que el estado ahora sea true (disponible)
-        assertEquals(6, libroMock.getStock()); // Verificamos que el stock aumentó en 1
-        assertEquals("cerrado", prestamoMock.getEstado());
+        when(detallePrestamoRepository
+                .findByPrestamo_IdPrestamo(1))
+                .thenReturn(List.of(detalleMock));
 
-        verify(detallePrestamoRepository).save(detalleMock);
-        verify(libroRepository).save(libroMock);
-        verify(prestamoRepository).save(prestamoMock);
+        DetallePrestamo resultado =
+                prestamoService.registrarDevolucion(1);
+
+        assertEquals(
+                "devuelto",
+                resultado.getEstado()
+        );
+
+        assertEquals(
+                LocalDate.now(),
+                resultado.getFechaDevolucion()
+        );
+
+        assertTrue(
+                libroMock.getEstado()
+        );
+
+        assertEquals(
+                "cerrado",
+                prestamoMock.getEstado()
+        );
+
+        verify(detallePrestamoRepository)
+                .save(detalleMock);
+
+        verify(libroRepository)
+                .save(libroMock);
+
+        verify(prestamoRepository)
+                .save(prestamoMock);
     }
 
     @Test
     void registrarDevolucion_Duplicada_LanzaExcepcion() {
+
         detalleMock.setEstado("devuelto");
-        when(detallePrestamoRepository.findById(1)).thenReturn(Optional.of(detalleMock));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            prestamoService.registrarDevolucion(1);
-        });
+        when(detallePrestamoRepository.findById(1))
+                .thenReturn(Optional.of(detalleMock));
 
-        assertTrue(exception.getMessage().contains("Devolución duplicada"));
-        verify(libroRepository, never()).save(any());
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> prestamoService
+                                .registrarDevolucion(1)
+                );
+
+        assertTrue(
+                exception
+                        .getMessage()
+                        .contains("Devolución duplicada")
+        );
+
+        verify(
+                libroRepository,
+                never()
+        ).save(any());
     }
 }

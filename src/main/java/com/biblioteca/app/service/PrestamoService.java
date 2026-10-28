@@ -64,17 +64,14 @@ public class PrestamoService {
                     .orElseThrow(() -> new IllegalArgumentException("Libro no encontrado."));
 
             // Verificamos si el libro está disponible (estado = true) y tiene stock mayor a 0
-            if (libro.getEstado() == null || !libro.getEstado() || libro.getStock() == null || libro.getStock() <= 0) {
-                throw new IllegalArgumentException("El libro " + libro.getTitulo() + " no está disponible o no tiene stock.");
+            if (libro.getEstado() == null || !libro.getEstado()) {
+                throw new IllegalArgumentException(
+                        "El libro " + libro.getTitulo() + " no está disponible."
+                );
             }
 
-            // Descontamos 1 del stock
-            libro.setStock(libro.getStock() - 1);
-            
-            // Si el stock llega a 0, cambiamos su estado a false (no disponible)
-            if (libro.getStock() == 0) {
-                libro.setEstado(false);
-            }
+            libro.setEstado(false);
+
             libroRepository.save(libro);
 
             // Configurar el detalle
@@ -103,8 +100,9 @@ public class PrestamoService {
 
         // 2. Liberar el libro (Aumentamos el stock y lo ponemos disponible nuevamente)
         Libro libro = detalle.getLibro();
-        libro.setStock((libro.getStock() == null ? 0 : libro.getStock()) + 1);
-        libro.setEstado(true); // true = disponible
+
+        libro.setEstado(true);
+
         libroRepository.save(libro);
 
         // 3. Verificar si todos los detalles de este préstamo ya están devueltos para cerrarlo

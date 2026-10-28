@@ -120,4 +120,23 @@ public class ViewController {
         return "categorias/editar";
     }
 
+    // =========================
+// LIBROS
+// =========================
+
+    @GetMapping("/libros")
+    public String libros() {
+        return "libros/lista";
+    }
+
+    @GetMapping("/libros/nuevo")
+    public String nuevoLibro() {
+        return "libros/formulario";
+    }
+
+    @GetMapping("/libros/editar")
+    public String editarLibro() {
+        return "libros/editar";
+    }
+
 }
