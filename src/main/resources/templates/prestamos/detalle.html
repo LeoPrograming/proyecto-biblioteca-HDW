@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Detalle de Préstamo')}"></head>
+
+<body>
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="management-container">
+    <div class="management-header">
+        <h1>Detalle del Préstamo</h1>
+    </div>
+
+    <div class="action-bar">
+        <a th:href="@{/prestamos}" class="btn btn-gray">Regresar</a>
+    </div>
+
+    <div id="resumenPrestamo" class="form-card" style="margin-bottom: 24px;">
+        Cargando préstamo...
+    </div>
+
+    <div id="mensajeDetallePrestamo" class="mensaje"></div>
+
+    <div class="table-wrapper">
+        <table class="management-table">
+            <thead>
+            <tr>
+                <th>ID detalle</th>
+                <th>Libro</th>
+                <th>Precio / tiempo</th>
+                <th>Tiempo</th>
+                <th>Fecha compromiso</th>
+                <th>Fecha devolución</th>
+                <th>Subtotal</th>
+                <th>Estado</th>
+                <th>Acción</th>
+            </tr>
+            </thead>
+            <tbody id="tablaDetallePrestamo">
+            <tr><td colspan="9">Cargando detalle...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<script th:src="@{/js/prestamos.js}"></script>
+</body>
+</html>

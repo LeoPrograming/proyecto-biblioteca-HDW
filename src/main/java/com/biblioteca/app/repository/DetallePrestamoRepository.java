@@ -10,4 +10,16 @@ import java.util.List;
 public interface DetallePrestamoRepository extends JpaRepository<DetallePrestamo, Integer> {
 
     List<DetallePrestamo> findByPrestamo_IdPrestamo(Integer idPrestamo);
+
+    List<DetallePrestamo> findByEstadoOrderByIdDetallePrestamoDesc(String estado);
+
+    List<DetallePrestamo> findByPrestamo_IdPrestamoAndEstado(
+            Integer idPrestamo,
+            String estado
+    );
+
+    long countByPrestamo_Usuario_IdUsuarioAndEstado(
+            Integer idUsuario,
+            String estado
+    );
 }

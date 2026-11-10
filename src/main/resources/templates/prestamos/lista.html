@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Gestión de Préstamos')}"></head>
+
+<body>
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="management-container">
+    <div class="management-header">
+        <h1>Gestión de Préstamos</h1>
+    </div>
+
+    <div class="action-bar">
+        <a th:href="@{/prestamos/nuevo}" class="btn btn-blue">Nuevo préstamo</a>
+        <button class="btn btn-yellow" id="btnDetallePrestamo" disabled>Ver detalle</button>
+        <a th:href="@{/dashboard}" class="btn btn-gray">Regresar</a>
+    </div>
+
+    <div class="usuarios-search">
+        <input type="text" id="buscarPrestamo"
+               placeholder="Buscar por ID, usuario, comprobante, serie, número o estado">
+        <button class="btn btn-blue" id="btnBuscarPrestamo">Buscar</button>
+        <button class="btn btn-gray" id="btnLimpiarPrestamo">Mostrar todos</button>
+    </div>
+
+    <div id="mensajePrestamos" class="mensaje"></div>
+
+    <div class="table-wrapper">
+        <table class="management-table">
+            <thead>
+            <tr>
+                <th></th>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Fecha préstamo</th>
+                <th>Comprobante</th>
+                <th>Serie</th>
+                <th>Número</th>
+                <th>Total</th>
+                <th>Estado</th>
+            </tr>
+            </thead>
+            <tbody id="tablaPrestamos">
+            <tr><td colspan="9">Cargando préstamos...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<script th:src="@{/js/prestamos.js}"></script>
+</body>
+</html>
