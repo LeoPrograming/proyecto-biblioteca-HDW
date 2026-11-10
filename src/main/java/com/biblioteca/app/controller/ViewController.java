@@ -139,4 +139,23 @@ public class ViewController {
         return "libros/editar";
     }
 
+    // =========================
+    // PRÉSTAMOS
+    // =========================
+
+    @GetMapping("/prestamos")
+    public String prestamos() {
+        return "prestamos/lista";
+    }
+
+    @GetMapping("/prestamos/nuevo")
+    public String nuevoPrestamo() {
+        return "prestamos/formulario";
+    }
+
+    @GetMapping("/prestamos/detalle")
+    public String detallePrestamo() {
+        return "prestamos/detalle";
+    }
+
 }

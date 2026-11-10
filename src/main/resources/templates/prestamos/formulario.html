@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Registrar Préstamo')}"></head>
+
+<body>
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="form-page">
+    <section class="form-card">
+        <div class="form-title">
+            <div>
+                <h1>Registrar Préstamo</h1>
+                <p>Selecciona un usuario y uno o más libros disponibles.</p>
+            </div>
+            <a th:href="@{/prestamos}" class="btn btn-gray">Regresar</a>
+        </div>
+
+        <form id="formPrestamo" class="management-form">
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="usuarioPrestamo">Usuario</label>
+                    <select id="usuarioPrestamo" required>
+                        <option value="">Seleccione un usuario</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="comprobantePrestamo">Comprobante</label>
+                    <select id="comprobantePrestamo" required>
+                        <option value="">Seleccione un comprobante</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="seriePrestamo">Serie</label>
+                    <input id="seriePrestamo" type="text" readonly>
+                </div>
+
+                <div class="form-field">
+                    <label for="numeroPrestamo">Número</label>
+                    <input id="numeroPrestamo" type="text" readonly>
+                </div>
+
+                <div class="form-field form-field-full">
+                    <label for="observacionesPrestamo">Observaciones</label>
+                    <input id="observacionesPrestamo" type="text" maxlength="250"
+                           placeholder="Observaciones del préstamo">
+                </div>
+            </div>
+
+            <div class="management-header" style="margin-top: 28px; margin-bottom: 12px;">
+                <h1 style="font-size: 20px;">Libros disponibles</h1>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="management-table">
+                    <thead>
+                    <tr>
+                        <th>Seleccionar</th>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>ISBN</th>
+                        <th>Precio / tiempo</th>
+                        <th>Tiempo</th>
+                        <th>Subtotal</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tablaLibrosPrestamo">
+                    <tr><td colspan="7">Cargando libros disponibles...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-grid" style="margin-top: 22px;">
+                <div class="form-field">
+                    <label for="totalPrestamo">Total</label>
+                    <input id="totalPrestamo" type="text" value="0.00" readonly>
+                </div>
+            </div>
+
+            <div id="mensajeNuevoPrestamo" class="form-message"></div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-blue">Registrar préstamo</button>
+                <a th:href="@{/prestamos}" class="btn btn-gray">Cancelar</a>
+            </div>
+        </form>
+    </section>
+</main>
+
+<script th:src="@{/js/prestamos.js}"></script>
+</body>
+</html>
