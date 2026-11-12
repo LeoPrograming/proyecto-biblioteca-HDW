@@ -11,6 +11,7 @@ import com.biblioteca.app.repository.DetallePrestamoRepository;
 import com.biblioteca.app.repository.LibroRepository;
 import com.biblioteca.app.repository.PrestamoRepository;
 import com.biblioteca.app.repository.UsuarioRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,9 @@ public class PrestamoService {
     private PrestamoRepository prestamoRepository;
 
     @Autowired
+    private ColaEsperaService colaEsperaService;
+
+    @Autowired
     private DetallePrestamoRepository detallePrestamoRepository;
 
     @Autowired
@@ -42,56 +46,94 @@ public class PrestamoService {
     @Autowired
     private ComprobanteRepository comprobanteRepository;
 
+
     public List<Prestamo> listarPrestamos() {
-        return prestamoRepository.findAllByOrderByIdPrestamoDesc();
+
+        return prestamoRepository
+                .findAllByOrderByIdPrestamoDesc();
     }
 
-    public List<Prestamo> buscarPrestamos(String buscar) {
-        if (buscar == null || buscar.isBlank()) {
+
+    public List<Prestamo> buscarPrestamos(
+            String buscar
+    ) {
+
+        if (buscar == null ||
+                buscar.isBlank()) {
+
             return listarPrestamos();
         }
 
-        return prestamoRepository.buscarPrestamos(buscar.trim());
+        return prestamoRepository
+                .buscarPrestamos(
+                        buscar.trim()
+                );
     }
 
-    public Prestamo buscarPorId(Integer id) {
-        return prestamoRepository.findById(id)
+
+    public Prestamo buscarPorId(
+            Integer id
+    ) {
+
+        return prestamoRepository
+                .findById(id)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
-                                "El préstamo con ID " + id + " no existe."
+                                "El préstamo con ID "
+                                        + id
+                                        + " no existe."
                         )
                 );
     }
 
-    public List<Prestamo> buscarPorUsuario(Integer idUsuario) {
-        return prestamoRepository.findByUsuario_IdUsuario(idUsuario);
+
+    public List<Prestamo> buscarPorUsuario(
+            Integer idUsuario
+    ) {
+
+        return prestamoRepository
+                .findByUsuario_IdUsuario(
+                        idUsuario
+                );
     }
 
-    public List<DetallePrestamo> listarDetalles(Integer idPrestamo) {
+
+    public List<DetallePrestamo> listarDetalles(
+            Integer idPrestamo
+    ) {
+
         buscarPorId(idPrestamo);
 
         return detallePrestamoRepository
-                .findByPrestamo_IdPrestamo(idPrestamo);
+                .findByPrestamo_IdPrestamo(
+                        idPrestamo
+                );
     }
 
+
     public List<Comprobante> listarComprobantes() {
-        return comprobanteRepository.findAll();
+
+        return comprobanteRepository
+                .findAll();
     }
+
 
     public Map<String, Object> obtenerDatosComprobante(
             Integer idComprobante
     ) {
 
-        comprobanteRepository.findById(idComprobante)
+        comprobanteRepository
+                .findById(idComprobante)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
                                 "Comprobante no encontrado."
                         )
                 );
 
-        String serie = idComprobante == 1
-                ? "R-2026"
-                : "F-2026";
+        String serie =
+                idComprobante == 1
+                        ? "R-2026"
+                        : "F-2026";
 
         long siguiente =
                 prestamoRepository
@@ -102,25 +144,37 @@ public class PrestamoService {
         Map<String, Object> datos =
                 new LinkedHashMap<>();
 
-        datos.put("serie", serie);
+        datos.put(
+                "serie",
+                serie
+        );
+
         datos.put(
                 "numero",
-                String.format("%06d", siguiente)
+                String.format(
+                        "%06d",
+                        siguiente
+                )
         );
 
         return datos;
     }
+
 
     @Transactional
     public Prestamo registrarPrestamo(
             NuevoPrestamoDTO datos
     ) {
 
-        validarNuevoPrestamo(datos);
+        validarNuevoPrestamo(
+                datos
+        );
 
         Usuario usuario =
                 usuarioRepository
-                        .findById(datos.getIdUsuario())
+                        .findById(
+                                datos.getIdUsuario()
+                        )
                         .orElseThrow(() ->
                                 new IllegalArgumentException(
                                         "Usuario no encontrado."
@@ -129,7 +183,9 @@ public class PrestamoService {
 
         Comprobante comprobante =
                 comprobanteRepository
-                        .findById(datos.getIdComprobante())
+                        .findById(
+                                datos.getIdComprobante()
+                        )
                         .orElseThrow(() ->
                                 new IllegalArgumentException(
                                         "Comprobante no encontrado."
@@ -137,11 +193,11 @@ public class PrestamoService {
                         );
 
         long librosPrestadosActuales =
-        detallePrestamoRepository
-                .countByPrestamo_Usuario_IdUsuarioAndEstado(
-                        datos.getIdUsuario(),
-                        "prestado"
-                );
+                detallePrestamoRepository
+                        .countByPrestamo_Usuario_IdUsuarioAndEstado(
+                                datos.getIdUsuario(),
+                                "prestado"
+                        );
 
         if (librosPrestadosActuales
                 + datos.getIdsLibros().size() > 2) {
@@ -151,31 +207,38 @@ public class PrestamoService {
             );
         }
 
-        Set<Integer> idsUnicos = new HashSet<>();
+        Set<Integer> idsUnicos =
+                new HashSet<>();
 
-        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal total =
+                BigDecimal.ZERO;
 
         /*
-         * Primero validamos todos los libros antes
-         * de guardar el préstamo.
+         * Primero validamos todos los libros
+         * antes de guardar el préstamo.
          */
         for (int i = 0;
              i < datos.getIdsLibros().size();
              i++) {
 
             Integer idLibro =
-                    datos.getIdsLibros().get(i);
+                    datos.getIdsLibros()
+                            .get(i);
 
             Integer tiempo =
-                    datos.getDias().get(i);
+                    datos.getDias()
+                            .get(i);
 
             if (!idsUnicos.add(idLibro)) {
+
                 throw new IllegalArgumentException(
                         "No se puede agregar el mismo libro más de una vez."
                 );
             }
 
-            if (tiempo == null || tiempo <= 0) {
+            if (tiempo == null ||
+                    tiempo <= 0) {
+
                 throw new IllegalArgumentException(
                         "El tiempo de préstamo debe ser mayor a cero."
                 );
@@ -191,7 +254,8 @@ public class PrestamoService {
                             );
 
             /*
-             * Solo se pueden prestar libros disponibles.
+             * Solo se pueden prestar
+             * libros disponibles.
              */
             if (!Boolean.TRUE.equals(
                     libro.getEstado()
@@ -209,11 +273,14 @@ public class PrestamoService {
                             ? BigDecimal.ZERO
                             : libro.getPrecioTiempo();
 
-            total = total.add(
-                    precio.multiply(
-                            BigDecimal.valueOf(tiempo)
-                    )
-            );
+            total =
+                    total.add(
+                            precio.multiply(
+                                    BigDecimal.valueOf(
+                                            tiempo
+                                    )
+                            )
+                    );
         }
 
         Map<String, Object> comprobanteGenerado =
@@ -224,22 +291,31 @@ public class PrestamoService {
         /*
          * Creamos el préstamo principal.
          */
-        Prestamo prestamo = new Prestamo();
+        Prestamo prestamo =
+                new Prestamo();
 
-        prestamo.setUsuario(usuario);
-        prestamo.setComprobante(comprobante);
+        prestamo.setUsuario(
+                usuario
+        );
+
+        prestamo.setComprobante(
+                comprobante
+        );
+
         prestamo.setFechaPrestamo(
                 LocalDateTime.now()
         );
 
-        prestamo.setEstado("abierto");
+        prestamo.setEstado(
+                "abierto"
+        );
 
         prestamo.setSerie(
                 datos.getSerie() == null
                         || datos.getSerie().isBlank()
                         ? comprobanteGenerado
-                                .get("serie")
-                                .toString()
+                          .get("serie")
+                          .toString()
                         : datos.getSerie().trim()
         );
 
@@ -247,22 +323,30 @@ public class PrestamoService {
                 datos.getNumero() == null
                         || datos.getNumero().isBlank()
                         ? comprobanteGenerado
-                                .get("numero")
-                                .toString()
+                          .get("numero")
+                          .toString()
                         : datos.getNumero().trim()
         );
 
-        prestamo.setImpuesto(BigDecimal.ZERO);
-        prestamo.setMontoTotal(total);
+        prestamo.setImpuesto(
+                BigDecimal.ZERO
+        );
+
+        prestamo.setMontoTotal(
+                total
+        );
+
         prestamo.setObservaciones(
                 datos.getObservaciones()
         );
 
         Prestamo prestamoGuardado =
-                prestamoRepository.save(prestamo);
+                prestamoRepository
+                        .save(prestamo);
 
         /*
-         * Creamos un detalle por cada libro.
+         * Creamos un detalle
+         * por cada libro.
          */
         for (int i = 0;
              i < datos.getIdsLibros().size();
@@ -281,7 +365,8 @@ public class PrestamoService {
                             );
 
             Integer tiempo =
-                    datos.getDias().get(i);
+                    datos.getDias()
+                            .get(i);
 
             BigDecimal precio =
                     libro.getPrecioTiempo() == null
@@ -290,7 +375,9 @@ public class PrestamoService {
 
             BigDecimal subtotal =
                     precio.multiply(
-                            BigDecimal.valueOf(tiempo)
+                            BigDecimal.valueOf(
+                                    tiempo
+                            )
                     );
 
             DetallePrestamo detalle =
@@ -300,52 +387,76 @@ public class PrestamoService {
                     prestamoGuardado
             );
 
-            detalle.setLibro(libro);
+            detalle.setLibro(
+                    libro
+            );
 
-            detalle.setPrecioTiempo(precio);
-            detalle.setTiempo(tiempo);
+            detalle.setPrecioTiempo(
+                    precio
+            );
+
+            detalle.setTiempo(
+                    tiempo
+            );
 
             detalle.setFechaCompromiso(
                     LocalDate.now()
-                            .plusDays(tiempo)
+                            .plusDays(
+                                    tiempo
+                            )
             );
 
-            detalle.setFechaDevolucion(null);
-            detalle.setEstado("prestado");
-            detalle.setSubtotal(subtotal);
+            detalle.setFechaDevolucion(
+                    null
+            );
+
+            detalle.setEstado(
+                    "prestado"
+            );
+
+            detalle.setSubtotal(
+                    subtotal
+            );
 
             detallePrestamoRepository
                     .save(detalle);
 
             /*
-             * Al prestarse, el libro deja
-             * de estar disponible.
+             * Al prestarse, el libro
+             * deja de estar disponible.
              */
-            libro.setEstado(false);
+            libro.setEstado(
+                    false
+            );
 
-            libroRepository.save(libro);
+            libroRepository
+                    .save(libro);
         }
 
         return prestamoGuardado;
     }
+
 
     private void validarNuevoPrestamo(
             NuevoPrestamoDTO datos
     ) {
 
         if (datos == null) {
+
             throw new IllegalArgumentException(
                     "Los datos del préstamo son obligatorios."
             );
         }
 
         if (datos.getIdUsuario() == null) {
+
             throw new IllegalArgumentException(
                     "Debe seleccionar un usuario."
             );
         }
 
         if (datos.getIdComprobante() == null) {
+
             throw new IllegalArgumentException(
                     "Debe seleccionar un comprobante."
             );
@@ -360,6 +471,7 @@ public class PrestamoService {
         }
 
         if (datos.getIdsLibros().size() > 2) {
+
             throw new IllegalArgumentException(
                     "Solo se permiten máximo 2 libros por préstamo."
             );
@@ -374,6 +486,7 @@ public class PrestamoService {
             );
         }
     }
+
 
     @Transactional
     public DetallePrestamo registrarDevolucion(
@@ -402,7 +515,9 @@ public class PrestamoService {
             );
         }
 
-        detalle.setEstado("devuelto");
+        detalle.setEstado(
+                "devuelto"
+        );
 
         detalle.setFechaDevolucion(
                 LocalDate.now()
@@ -412,17 +527,33 @@ public class PrestamoService {
                 .save(detalle);
 
         /*
-         * El libro vuelve a estar disponible.
+         * El libro vuelve
+         * a estar disponible.
          */
-        Libro libro = detalle.getLibro();
+        Libro libro =
+                detalle.getLibro();
 
-        libro.setEstado(true);
+        libro.setEstado(
+                true
+        );
 
-        libroRepository.save(libro);
+        libroRepository
+                .save(libro);
 
         /*
-         * Revisamos si todavía quedan libros
-         * sin devolver dentro del préstamo.
+         * COLA DE ESPERA:
+         * si existe un lector esperando
+         * este libro, se notifica únicamente
+         * al primero que ingresó a la cola.
+         */
+        colaEsperaService
+                .notificarPrimerLectorEnEspera(
+                        libro.getIdLibro()
+                );
+
+        /*
+         * Revisamos si todavía
+         * quedan libros sin devolver.
          */
         Prestamo prestamo =
                 detalle.getPrestamo();
@@ -440,9 +571,12 @@ public class PrestamoService {
          */
         if (pendientes.isEmpty()) {
 
-            prestamo.setEstado("cerrado");
+            prestamo.setEstado(
+                    "cerrado"
+            );
 
-            prestamoRepository.save(prestamo);
+            prestamoRepository
+                    .save(prestamo);
         }
 
         return detalle;
