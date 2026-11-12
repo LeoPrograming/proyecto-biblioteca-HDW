@@ -11,9 +11,11 @@ import com.biblioteca.app.repository.DetallePrestamoRepository;
 import com.biblioteca.app.repository.LibroRepository;
 import com.biblioteca.app.repository.PrestamoRepository;
 import com.biblioteca.app.repository.UsuarioRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -45,6 +47,9 @@ class PrestamoServiceTest {
 
     @Mock
     private ComprobanteRepository comprobanteRepository;
+
+    @Mock
+    private ColaEsperaService colaEsperaService;
 
     @InjectMocks
     private PrestamoService prestamoService;
@@ -96,34 +101,48 @@ class PrestamoServiceTest {
 
         dto.setIdUsuario(1);
         dto.setIdComprobante(1);
-        dto.setIdsLibros(List.of(10));
-        dto.setDias(List.of(3));
-        dto.setObservaciones("Préstamo de prueba");
+        dto.setIdsLibros(
+                List.of(10)
+        );
+        dto.setDias(
+                List.of(3)
+        );
+        dto.setObservaciones(
+                "Préstamo de prueba"
+        );
 
         when(usuarioRepository.findById(1))
-                .thenReturn(Optional.of(usuario));
+                .thenReturn(
+                        Optional.of(usuario)
+                );
 
         when(comprobanteRepository.findById(1))
-                .thenReturn(Optional.of(comprobante));
+                .thenReturn(
+                        Optional.of(comprobante)
+                );
 
         when(libroRepository.findById(10))
-                .thenReturn(Optional.of(libro));
+                .thenReturn(
+                        Optional.of(libro)
+                );
 
         when(
                 prestamoRepository
                         .countByComprobante_IdComprobante(1)
         ).thenReturn(0L);
 
-        when(prestamoRepository.save(any(Prestamo.class)))
-                .thenAnswer(invocation -> {
+        when(
+                prestamoRepository
+                        .save(any(Prestamo.class))
+        ).thenAnswer(invocation -> {
 
-                    Prestamo guardado =
-                            invocation.getArgument(0);
+            Prestamo guardado =
+                    invocation.getArgument(0);
 
-                    guardado.setIdPrestamo(1);
+            guardado.setIdPrestamo(1);
 
-                    return guardado;
-                });
+            return guardado;
+        });
 
         Prestamo resultado =
                 prestamoService
@@ -149,15 +168,20 @@ class PrestamoServiceTest {
                 resultado.getNumero()
         );
 
-        assertFalse(libro.getEstado());
+        assertFalse(
+                libro.getEstado()
+        );
 
         ArgumentCaptor<DetallePrestamo> captor =
                 ArgumentCaptor.forClass(
                         DetallePrestamo.class
                 );
 
-        verify(detallePrestamoRepository)
-                .save(captor.capture());
+        verify(
+                detallePrestamoRepository
+        ).save(
+                captor.capture()
+        );
 
         DetallePrestamo detalleGuardado =
                 captor.getValue();
@@ -183,12 +207,15 @@ class PrestamoServiceTest {
         );
 
         assertEquals(
-                LocalDate.now().plusDays(3),
-                detalleGuardado.getFechaCompromiso()
+                LocalDate.now()
+                        .plusDays(3),
+                detalleGuardado
+                        .getFechaCompromiso()
         );
 
-        verify(libroRepository)
-                .save(libro);
+        verify(
+                libroRepository
+        ).save(libro);
     }
 
     @Test
@@ -200,13 +227,19 @@ class PrestamoServiceTest {
                 crearDtoValido();
 
         when(usuarioRepository.findById(1))
-                .thenReturn(Optional.of(usuario));
+                .thenReturn(
+                        Optional.of(usuario)
+                );
 
         when(comprobanteRepository.findById(1))
-                .thenReturn(Optional.of(comprobante));
+                .thenReturn(
+                        Optional.of(comprobante)
+                );
 
         when(libroRepository.findById(10))
-                .thenReturn(Optional.of(libro));
+                .thenReturn(
+                        Optional.of(libro)
+                );
 
         IllegalArgumentException error =
                 assertThrows(
@@ -218,7 +251,9 @@ class PrestamoServiceTest {
 
         assertTrue(
                 error.getMessage()
-                        .contains("no está disponible")
+                        .contains(
+                                "no está disponible"
+                        )
         );
 
         verify(
@@ -243,13 +278,19 @@ class PrestamoServiceTest {
         );
 
         when(usuarioRepository.findById(1))
-                .thenReturn(Optional.of(usuario));
+                .thenReturn(
+                        Optional.of(usuario)
+                );
 
         when(comprobanteRepository.findById(1))
-                .thenReturn(Optional.of(comprobante));
+                .thenReturn(
+                        Optional.of(comprobante)
+                );
 
         when(libroRepository.findById(10))
-                .thenReturn(Optional.of(libro));
+                .thenReturn(
+                        Optional.of(libro)
+                );
 
         IllegalArgumentException error =
                 assertThrows(
@@ -261,7 +302,9 @@ class PrestamoServiceTest {
 
         assertTrue(
                 error.getMessage()
-                        .contains("mismo libro")
+                        .contains(
+                                "mismo libro"
+                        )
         );
 
         verify(
@@ -277,7 +320,9 @@ class PrestamoServiceTest {
                 crearDtoValido();
 
         when(usuarioRepository.findById(1))
-                .thenReturn(Optional.empty());
+                .thenReturn(
+                        Optional.empty()
+                );
 
         IllegalArgumentException error =
                 assertThrows(
@@ -297,7 +342,9 @@ class PrestamoServiceTest {
     void debeGenerarSerieYNumeroDeComprobante() {
 
         when(comprobanteRepository.findById(1))
-                .thenReturn(Optional.of(comprobante));
+                .thenReturn(
+                        Optional.of(comprobante)
+                );
 
         when(
                 prestamoRepository
@@ -324,10 +371,12 @@ class PrestamoServiceTest {
 
         libro.setEstado(false);
 
-        when(detallePrestamoRepository.findById(1))
-                .thenReturn(
-                        Optional.of(detalle)
-                );
+        when(
+                detallePrestamoRepository
+                        .findById(1)
+        ).thenReturn(
+                Optional.of(detalle)
+        );
 
         when(
                 detallePrestamoRepository
@@ -335,7 +384,9 @@ class PrestamoServiceTest {
                                 1,
                                 "prestado"
                         )
-        ).thenReturn(List.of());
+        ).thenReturn(
+                List.of()
+        );
 
         DetallePrestamo resultado =
                 prestamoService
@@ -360,14 +411,56 @@ class PrestamoServiceTest {
                 prestamo.getEstado()
         );
 
-        verify(detallePrestamoRepository)
-                .save(detalle);
+        verify(
+                detallePrestamoRepository
+        ).save(detalle);
 
-        verify(libroRepository)
-                .save(libro);
+        verify(
+                libroRepository
+        ).save(libro);
 
-        verify(prestamoRepository)
-                .save(prestamo);
+        verify(
+                colaEsperaService
+        ).notificarPrimerLectorEnEspera(
+                10
+        );
+
+        verify(
+                prestamoRepository
+        ).save(prestamo);
+    }
+
+    @Test
+    void registrarDevolucionDebeNotificarPrimerLectorEnCola() {
+
+        libro.setEstado(false);
+
+        when(
+                detallePrestamoRepository
+                        .findById(1)
+        ).thenReturn(
+                Optional.of(detalle)
+        );
+
+        when(
+                detallePrestamoRepository
+                        .findByPrestamo_IdPrestamoAndEstado(
+                                1,
+                                "prestado"
+                        )
+        ).thenReturn(
+                List.of()
+        );
+
+        prestamoService
+                .registrarDevolucion(1);
+
+        verify(
+                colaEsperaService,
+                times(1)
+        ).notificarPrimerLectorEnEspera(
+                libro.getIdLibro()
+        );
     }
 
     @Test
@@ -378,12 +471,16 @@ class PrestamoServiceTest {
 
         pendiente.setIdDetallePrestamo(2);
         pendiente.setPrestamo(prestamo);
-        pendiente.setEstado("prestado");
+        pendiente.setEstado(
+                "prestado"
+        );
 
-        when(detallePrestamoRepository.findById(1))
-                .thenReturn(
-                        Optional.of(detalle)
-                );
+        when(
+                detallePrestamoRepository
+                        .findById(1)
+        ).thenReturn(
+                Optional.of(detalle)
+        );
 
         when(
                 detallePrestamoRepository
@@ -404,6 +501,12 @@ class PrestamoServiceTest {
         );
 
         verify(
+                colaEsperaService
+        ).notificarPrimerLectorEnEspera(
+                10
+        );
+
+        verify(
                 prestamoRepository,
                 never()
         ).save(prestamo);
@@ -412,12 +515,16 @@ class PrestamoServiceTest {
     @Test
     void registrarDevolucionDuplicadaDebeLanzarExcepcion() {
 
-        detalle.setEstado("devuelto");
+        detalle.setEstado(
+                "devuelto"
+        );
 
-        when(detallePrestamoRepository.findById(1))
-                .thenReturn(
-                        Optional.of(detalle)
-                );
+        when(
+                detallePrestamoRepository
+                        .findById(1)
+        ).thenReturn(
+                Optional.of(detalle)
+        );
 
         IllegalArgumentException error =
                 assertThrows(
@@ -438,9 +545,16 @@ class PrestamoServiceTest {
                 libroRepository,
                 never()
         ).save(any());
+
+        verify(
+                colaEsperaService,
+                never()
+        ).notificarPrimerLectorEnEspera(
+                anyInt()
+        );
     }
 
-        @Test
+    @Test
     void debeRechazarMasDeDosLibrosEnUnPrestamo() {
 
         NuevoPrestamoDTO dto =
@@ -448,11 +562,21 @@ class PrestamoServiceTest {
 
         dto.setIdUsuario(1);
         dto.setIdComprobante(1);
+
         dto.setIdsLibros(
-                List.of(10, 11, 12)
+                List.of(
+                        10,
+                        11,
+                        12
+                )
         );
+
         dto.setDias(
-                List.of(2, 2, 2)
+                List.of(
+                        2,
+                        2,
+                        2
+                )
         );
 
         IllegalArgumentException error =
@@ -524,9 +648,11 @@ class PrestamoServiceTest {
 
         dto.setIdUsuario(1);
         dto.setIdComprobante(1);
+
         dto.setIdsLibros(
                 List.of(10)
         );
+
         dto.setDias(
                 List.of(2)
         );

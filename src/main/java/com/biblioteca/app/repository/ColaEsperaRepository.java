@@ -5,15 +5,29 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface ColaEsperaRepository extends JpaRepository<ColaEspera, Integer> {
+public interface ColaEsperaRepository
+        extends JpaRepository<ColaEspera, Integer> {
 
-    List<ColaEspera> findByUsuario_IdUsuario(Integer idUsuario);
+    List<ColaEspera> findByUsuario_IdUsuario(
+            Integer idUsuario
+    );
 
-    List<ColaEspera> findByLibro_IdLibro(Integer idLibro);
+    List<ColaEspera> findByLibro_IdLibro(
+            Integer idLibro
+    );
 
-    List<ColaEspera> findByEstado(String estado);
+    List<ColaEspera> findByEstado(
+            String estado
+    );
+
+    Optional<ColaEspera>
+    findFirstByLibro_IdLibroAndEstadoOrderByFechaRegistroAsc(
+            Integer idLibro,
+            String estado
+    );
 
     boolean existsByUsuario_IdUsuarioAndLibro_IdLibroAndEstado(
             Integer idUsuario,
