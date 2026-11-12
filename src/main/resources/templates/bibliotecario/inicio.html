@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Panel del Bibliotecario')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="admin-container">
+
+    <section class="admin-header">
+
+        <h1>Panel del Bibliotecario</h1>
+
+        <p>
+            Bienvenido
+            <strong>Bibliotecario</strong>
+        </p>
+
+        <!-- Solo aparece cuando el Administrador entra en modo Vista Bibliotecario -->
+        <div th:if="${session.vistaBibliotecarioDesdeAdmin}"
+             style="margin-top: 15px;">
+
+            <div style="
+                background: #fff3cd;
+                border: 1px solid #ffe69c;
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin-bottom: 12px;
+            ">
+                Estás visualizando el sistema como Bibliotecario desde una cuenta Administrador.
+            </div>
+
+            <a th:href="@{/salir-vista-bibliotecario}"
+               class="btn btn-danger">
+                Volver al Administrador
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <section class="module-grid">
+
+        <a th:href="@{/prestamos/nuevo}" class="module-card">
+
+            <div class="module-icon">
+                ➕📖
+            </div>
+
+            <span>Nuevo Préstamo</span>
+
+        </a>
+
+
+        <a th:href="@{/prestamos}" class="module-card">
+
+            <div class="module-icon">
+                📚
+            </div>
+
+            <span>Préstamos y Devoluciones</span>
+
+        </a>
+
+
+        <a th:href="@{/lectores}" class="module-card">
+
+            <div class="module-icon">
+                👥
+            </div>
+
+            <span>Gestión de Lectores</span>
+
+        </a>
+
+
+        <a th:href="@{/libros}" class="module-card">
+
+            <div class="module-icon">
+                🔎📘
+            </div>
+
+            <span>Gestión de Libros</span>
+
+        </a>
+
+    </section>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+
+</body>
+
+</html>

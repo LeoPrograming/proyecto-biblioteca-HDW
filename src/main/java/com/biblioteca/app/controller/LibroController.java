@@ -108,8 +108,31 @@ public class LibroController {
     public ResponseEntity<Map<String, Object>>
     cambiarEstado(
             @PathVariable Integer id,
-            @RequestBody
-            Map<String, Boolean> peticion) {
+            @RequestBody Map<String, Boolean> peticion,
+            jakarta.servlet.http.HttpServletRequest request) {
+
+        jakarta.servlet.http.HttpSession session =
+                request.getSession(false);
+
+        if (session != null) {
+
+            Object rol =
+                    session.getAttribute(
+                            "tipoUsuario"
+                    );
+
+            if (rol != null
+                    && "Bibliotecario"
+                    .equalsIgnoreCase(
+                            rol.toString()
+                    )) {
+
+                throw new org.springframework.web.server.ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "El bibliotecario no puede cambiar el estado de los libros"
+                );
+            }
+        }
 
         Boolean estado =
                 peticion.get("estado");
@@ -125,7 +148,6 @@ public class LibroController {
                 aRespuesta(libro)
         );
     }
-
     // Respuesta JSON
     private Map<String, Object>
     aRespuesta(
