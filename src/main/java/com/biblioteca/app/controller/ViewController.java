@@ -158,4 +158,50 @@ public class ViewController {
         return "prestamos/detalle";
     }
 
+
+    // =========================
+// BIBLIOTECARIO
+// =========================
+
+    @GetMapping("/bibliotecario")
+    public String bibliotecario() {
+        return "bibliotecario/inicio";
+    }
+
+
+    @GetMapping("/vista-bibliotecario")
+    public String vistaBibliotecario(
+            jakarta.servlet.http.HttpSession session) {
+
+        Object rol =
+                session.getAttribute("tipoUsuario");
+
+        if (rol == null
+                || !"Administrador".equalsIgnoreCase(
+                rol.toString()
+        )) {
+
+            return "redirect:/login";
+        }
+
+        session.setAttribute(
+                "vistaBibliotecarioDesdeAdmin",
+                true
+        );
+
+        return "redirect:/bibliotecario";
+    }
+
+
+    @GetMapping("/salir-vista-bibliotecario")
+    public String salirVistaBibliotecario(
+            jakarta.servlet.http.HttpSession session) {
+
+        session.removeAttribute(
+                "vistaBibliotecarioDesdeAdmin"
+        );
+
+        return "redirect:/dashboard";
+    }
 }
+

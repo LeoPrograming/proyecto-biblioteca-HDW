@@ -51,7 +51,24 @@ document.addEventListener("DOMContentLoaded", () => {
                     JSON.stringify(data)
                 );
 
-                window.location.href = "/dashboard";
+                const tipoUsuario = data.tipoUsuario;
+
+                if (tipoUsuario === "Administrador") {
+
+                    window.location.href = "/dashboard";
+
+                } else if (tipoUsuario === "Bibliotecario") {
+
+                    window.location.href = "/bibliotecario";
+
+                } else if (tipoUsuario === "Lector") {
+
+                    window.location.href = "/lector";
+
+                } else {
+
+                    window.location.href = "/login";
+                }
 
             } catch (error) {
 
@@ -5936,3 +5953,77 @@ function actualizarPreviewLibro(
             "none";
     };
 }
+
+function volverAlPanel() {
+
+    const sesionGuardada =
+        localStorage.getItem("bibliotecaSesion");
+
+    if (!sesionGuardada) {
+        window.location.href = "/login";
+        return;
+    }
+
+    try {
+
+        const sesion =
+            JSON.parse(sesionGuardada);
+
+        if (sesion.tipoUsuario === "Administrador") {
+
+            window.location.href = "/dashboard";
+
+        } else if (sesion.tipoUsuario === "Bibliotecario") {
+
+            window.location.href = "/bibliotecario";
+
+        } else if (sesion.tipoUsuario === "Lector") {
+
+            window.location.href = "/lector";
+
+        } else {
+
+            window.location.href = "/login";
+        }
+
+    } catch (error) {
+
+        window.location.href = "/login";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const sesionGuardada =
+        localStorage.getItem("bibliotecaSesion");
+
+    if (!sesionGuardada) {
+        return;
+    }
+
+    try {
+
+        const sesion =
+            JSON.parse(sesionGuardada);
+
+        if (
+            sesion.tipoUsuario === "Bibliotecario"
+        ) {
+
+            const btnEstadoLibro =
+                document.getElementById(
+                    "btnEstadoLibro"
+                );
+
+            if (btnEstadoLibro) {
+                btnEstadoLibro.style.display = "none";
+            }
+        }
+
+    } catch (error) {
+
+        console.error(
+            "No se pudo validar el rol del usuario."
+        );
+    }
+});
