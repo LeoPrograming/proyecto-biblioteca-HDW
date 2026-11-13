@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.biblioteca.app.service.PdfPrestamoService;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,8 @@ public class PrestamoController {
 
     @Autowired
     private PrestamoService prestamoService;
-
+    @Autowired
+    private PdfPrestamoService pdfPrestamoService;
     /*
      * Lista todos los préstamos.
      * Si se recibe ?buscar=..., realiza la búsqueda.
@@ -55,6 +56,172 @@ public class PrestamoController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(prestamo);
+    }
+
+    /*
+     * Lista únicamente los préstamos
+     * correspondientes a un usuario.
+     *
+     * Si el usuario autenticado es Lector,
+     * solamente puede consultar sus propios
+     * préstamos.
+     */
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<List<Prestamo>> listarPorUsuario(
+            @PathVariable Integer idUsuario,
+            jakarta.servlet.http.HttpServletRequest request
+    ) {
+
+        jakarta.servlet.http.HttpSession session =
+                request.getSession(false);
+
+        /*
+         * Se valida que exista una sesión activa.
+         */
+        if (session == null
+                || session.getAttribute("usuarioId") == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .build();
+        }
+
+        Object rol =
+                session.getAttribute("tipoUsuario");
+
+        Integer usuarioSesion =
+                (Integer) session.getAttribute("usuarioId");
+
+        /*
+         * El Lector solamente puede consultar
+         * sus propios préstamos.
+         */
+        if (rol != null
+                && "Lector".equalsIgnoreCase(
+                rol.toString()
+        )
+                && !usuarioSesion.equals(idUsuario)) {
+
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .build();
+        }
+
+        return ResponseEntity.ok(
+                prestamoService.buscarPorUsuario(
+                        idUsuario
+                )
+        );
+    }
+
+    /*
+     * Devuelve un préstamo específico para el Lector.
+     *
+     * El Lector solamente puede consultar
+     * préstamos pertenecientes a su propia cuenta.
+     */
+    @GetMapping("/lector/{idPrestamo}")
+    public ResponseEntity<Map<String, Object>> obtenerPrestamoLector(
+            @PathVariable Integer idPrestamo,
+            jakarta.servlet.http.HttpServletRequest request
+    ) {
+
+        jakarta.servlet.http.HttpSession session =
+                request.getSession(false);
+
+        if (session == null
+                || session.getAttribute("usuarioId") == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .build();
+        }
+
+        Object rol =
+                session.getAttribute("tipoUsuario");
+
+        Integer idUsuarioSesion =
+                (Integer) session.getAttribute("usuarioId");
+
+        if (rol == null
+                || !"Lector".equalsIgnoreCase(
+                rol.toString()
+        )) {
+
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .build();
+        }
+
+        Prestamo prestamo =
+                prestamoService.buscarPorId(
+                        idPrestamo
+                );
+
+        if (prestamo.getUsuario() == null
+                || !idUsuarioSesion.equals(
+                prestamo.getUsuario()
+                        .getIdUsuario()
+        )) {
+
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .build();
+        }
+
+        Map<String, Object> respuesta =
+                new LinkedHashMap<>();
+
+        respuesta.put(
+                "idPrestamo",
+                prestamo.getIdPrestamo()
+        );
+
+        respuesta.put(
+                "fechaPrestamo",
+                prestamo.getFechaPrestamo()
+        );
+
+        respuesta.put(
+                "estado",
+                prestamo.getEstado()
+        );
+
+        respuesta.put(
+                "serie",
+                prestamo.getSerie()
+        );
+
+        respuesta.put(
+                "numero",
+                prestamo.getNumero()
+        );
+
+        respuesta.put(
+                "montoTotal",
+                prestamo.getMontoTotal()
+        );
+
+        respuesta.put(
+                "observaciones",
+                prestamo.getObservaciones()
+        );
+
+        List<Map<String, Object>> detalles =
+                prestamoService
+                        .listarDetalles(idPrestamo)
+                        .stream()
+                        .map(this::convertirDetalle)
+                        .toList();
+
+        respuesta.put(
+                "detalles",
+                detalles
+        );
+
+        return ResponseEntity.ok(
+                respuesta
+        );
     }
 
     /*
@@ -130,7 +297,9 @@ public class PrestamoController {
                 prestamoService
                         .registrarDevolucion(idDetalle);
 
-        return ResponseEntity.ok(detalleDevuelto);
+        return ResponseEntity.ok(
+                detalleDevuelto
+        );
     }
 
     /*
@@ -200,6 +369,80 @@ public class PrestamoController {
      * Los errores de validación del servicio
      * regresan al frontend como JSON.
      */
+    /*
+     * Genera el comprobante PDF de un préstamo.
+     */
+    @GetMapping("/{idPrestamo}/pdf")
+    public ResponseEntity<byte[]> descargarPdf(
+            @PathVariable Integer idPrestamo,
+            jakarta.servlet.http.HttpServletRequest request
+    ) {
+
+        jakarta.servlet.http.HttpSession session =
+                request.getSession(false);
+
+        if (session == null
+                || session.getAttribute("usuarioId") == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .build();
+        }
+
+        Prestamo prestamo =
+                prestamoService.buscarPorId(
+                        idPrestamo
+                );
+
+        Object rol =
+                session.getAttribute("tipoUsuario");
+
+        Integer idUsuarioSesion =
+                (Integer) session.getAttribute(
+                        "usuarioId"
+                );
+
+        /*
+         * Si es Lector, solamente puede descargar
+         * comprobantes de sus propios préstamos.
+         */
+        if (rol != null
+                && "Lector".equalsIgnoreCase(
+                rol.toString()
+        )) {
+
+            if (prestamo.getUsuario() == null
+                    || !idUsuarioSesion.equals(
+                    prestamo.getUsuario()
+                            .getIdUsuario()
+            )) {
+
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .build();
+            }
+        }
+
+        byte[] pdf =
+                pdfPrestamoService
+                        .generarComprobante(
+                                idPrestamo
+                        );
+
+        return ResponseEntity.ok()
+                .header(
+                        "Content-Type",
+                        "application/pdf"
+                )
+                .header(
+                        "Content-Disposition",
+                        "attachment; filename=comprobante-reserva-"
+                                + idPrestamo
+                                + ".pdf"
+                )
+                .body(pdf);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> manejarError(
             IllegalArgumentException exception

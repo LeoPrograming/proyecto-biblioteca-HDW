@@ -203,5 +203,67 @@ public class ViewController {
 
         return "redirect:/dashboard";
     }
+
+    // =========================
+// LECTOR
+// =========================
+    @GetMapping("/lector")
+    public String lector() {
+        return "lector/inicio";
+    }
+
+
+
+    @GetMapping("/lector/catalogo")
+    public String catalogoLector() {
+        return "lector/catalogo";
+    }
+
+
+
+
+    @GetMapping("/lector/catalogo/{idCategoria}")
+    public String librosCategoriaLector() {
+        return "lector/libros-categoria";
+    }
+
+    @GetMapping("/lector/reservar/{idLibro}")
+    public String reservarLibroLector() {
+        return "lector/reservar";
+    }
+
+
+    @GetMapping("/lector/prestamos")
+    public String prestamosLector() {
+        return "lector/prestamos";
+    }
+
+
+
+    @GetMapping("/lector/prestamos/{idPrestamo}")
+    public String detallePrestamoLector() {
+        return "lector/detalle-prestamo";
+    }
+    @GetMapping("/lector/reserva/resultado/{idPrestamo}")
+    public String resultadoReservaLector() {
+        return "lector/resultado-reserva";
+    }
+
+
+
+    @GetMapping("/lector/cola")
+    public String colaEsperaLector() {
+        return "lector/cola";
+    }
+
+    @GetMapping("/lector/cola/{idLibro}")
+    public String unirseColaLector() {
+        return "lector/unirse-cola";
+    }
+
+
+
+
+
 }
 
