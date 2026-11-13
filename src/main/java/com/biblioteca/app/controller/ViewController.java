@@ -17,8 +17,39 @@ public class ViewController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard() {
+    public String dashboard(
+            jakarta.servlet.http.HttpSession session) {
+
+        // Al volver al panel Administrador se cierra
+        // el modo "Vista como Bibliotecario"
+        session.removeAttribute(
+                "vistaBibliotecarioDesdeAdmin"
+        );
+
         return "dashboard";
+    }
+
+
+    // =========================
+    // REPORTES (ADMINISTRADOR)
+    // =========================
+
+    @GetMapping("/reportes")
+    public String reportes(
+            jakarta.servlet.http.HttpSession session) {
+
+        Object rol =
+                session.getAttribute("tipoUsuario");
+
+        if (rol == null
+                || !"Administrador".equalsIgnoreCase(
+                rol.toString()
+        )) {
+
+            return "redirect:/login";
+        }
+
+        return "reportes/inicio";
     }
 
 
