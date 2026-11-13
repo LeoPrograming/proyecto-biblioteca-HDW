@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Reserva realizada')}"></head>
+
+<body>
+
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<main class="admin-container">
+
+    <section style="
+        max-width: 850px;
+        margin: 45px auto;
+    ">
+
+        <div id="resultadoReservaLector"
+             style="
+                background: white;
+                border-radius: 16px;
+                padding: 35px;
+                box-shadow: 0 5px 18px rgba(0,0,0,0.09);
+            ">
+
+            <div style="
+                text-align: center;
+                padding: 30px;
+            ">
+                Cargando resultado...
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/lector.js}"></script>
+
+</body>
+</html>
