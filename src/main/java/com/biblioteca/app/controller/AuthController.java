@@ -74,4 +74,23 @@ public class AuthController {
 
         return ResponseEntity.ok(respuesta);
     }
+
+    // =========================
+    // CERRAR SESIÓN
+    // =========================
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout(
+            HttpServletRequest request) {
+
+        HttpSession sesion = request.getSession(false);
+
+        if (sesion != null) {
+            sesion.invalidate();
+        }
+
+        Map<String, Object> respuesta = new HashMap<>();
+        respuesta.put("mensaje", "Sesión cerrada correctamente");
+
+        return ResponseEntity.ok(respuesta);
+    }
 }
