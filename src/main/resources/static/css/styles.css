@@ -981,3 +981,43 @@ body {
         grid-column: 1 / -1;
     }
 }
+
+/* =========================
+   REPORTES (ADMINISTRADOR)
+   ========================= */
+
+.reporte-resumen {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 16px;
+    margin: 20px 0 30px;
+}
+
+.reporte-card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.reporte-numero {
+    font-size: 30px;
+    font-weight: bold;
+    color: var(--blue-dark);
+    margin-bottom: 8px;
+}
+
+.reporte-etiqueta {
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.reporte-titulo {
+    color: var(--blue-dark);
+    font-size: 20px;
+    margin: 28px 0 12px;
+}

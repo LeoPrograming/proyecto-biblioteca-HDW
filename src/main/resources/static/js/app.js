@@ -112,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             localStorage.removeItem("bibliotecaUsuario");
             localStorage.removeItem("bibliotecaSesion");
+            localStorage.removeItem("vistaBibliotecario");
 
             window.location.replace("/login");
 
@@ -5977,7 +5978,17 @@ function volverAlPanel() {
 
         if (sesion.tipoUsuario === "Administrador") {
 
-            window.location.href = "/dashboard";
+            // Si el Administrador está en
+            // "Vista como Bibliotecario", regresa
+            // al panel del Bibliotecario
+            if (localStorage.getItem("vistaBibliotecario") === "true") {
+
+                window.location.href = "/bibliotecario";
+
+            } else {
+
+                window.location.href = "/dashboard";
+            }
 
         } else if (sesion.tipoUsuario === "Bibliotecario") {
 
@@ -6031,5 +6042,49 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error(
             "No se pudo validar el rol del usuario."
         );
+    }
+});
+
+
+// =========================
+// MÓDULO ADMINISTRADOR
+// Bienvenida y control de
+// "Vista como Bibliotecario"
+// =========================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const ruta =
+        window.location.pathname;
+
+    // Panel Administrador: se muestra el nombre
+    // y se cierra el modo Vista como Bibliotecario
+    if (ruta === "/dashboard") {
+
+        localStorage.removeItem("vistaBibliotecario");
+
+        const nombreBienvenida =
+            document.getElementById("nombreBienvenida");
+
+        const usuario =
+            localStorage.getItem("bibliotecaUsuario");
+
+        if (nombreBienvenida && usuario) {
+            nombreBienvenida.textContent = usuario;
+        }
+    }
+
+    // Panel Bibliotecario: se recuerda si el
+    // Administrador entró en modo Vista
+    if (ruta === "/bibliotecario") {
+
+        if (document.getElementById("avisoVistaBibliotecario")) {
+
+            localStorage.setItem("vistaBibliotecario", "true");
+
+        } else {
+
+            localStorage.removeItem("vistaBibliotecario");
+        }
     }
 });
