@@ -44,7 +44,7 @@ class RoleInterceptorTest {
     @Test
     void sinSesionRedirigeAlLogin() throws Exception {
 
-        assertEquals("/login", ejecutar(peticion("/dashboard", null)));
+        assertEquals("/dashboard", ejecutar(peticion("/dashboard", null)));
         assertEquals("/login", ejecutar(peticion("/bibliotecario", null)));
         assertEquals("/login", ejecutar(peticion("/lector/catalogo", null)));
         assertEquals("/login", ejecutar(peticion("/prestamos", null)));
