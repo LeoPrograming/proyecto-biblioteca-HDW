@@ -1,72 +1,36 @@
-\---
-
+---
 name: Reporte de error
-
 about: Reporta un error encontrado en STM Biblioteca
-
-title: "\[BUG] "
-
+title: "[BUG] "
 labels: bug
-
 assignees: ''
+---
 
-\---
-
-
-
-\## Descripción
-
+## Descripción
 Describe brevemente el error encontrado.
 
+## Pasos para reproducir
+1. 
+2. 
+3. 
 
-
-\## Pasos para reproducir
-
-1\. 
-
-2\. 
-
-3\. 
-
-
-
-\## Resultado esperado
-
+## Resultado esperado
 ¿Qué debería ocurrir?
 
-
-
-\## Resultado actual
-
+## Resultado actual
 ¿Qué ocurre realmente?
 
-
-
-\## Evidencia
-
+## Evidencia
 Adjunta capturas de pantalla o el mensaje de error.
 
+## Rol con el que se probó
+- [ ] Sin sesión
+- [ ] Administrador
+- [ ] Bibliotecario
+- [ ] Lector
 
-
-\## Rol con el que se probó
-
-\- \[ ] Sin sesión
-
-\- \[ ] Administrador
-
-\- \[ ] Bibliotecario
-
-\- \[ ] Lector
-
-
-
-\## Prioridad sugerida
-
-\- \[ ] P1-Crítica
-
-\- \[ ] P2-Alta
-
-\- \[ ] P3-Media
-
-\- \[ ] P4-Baja
-
+## Prioridad sugerida
+- [ ] P1-Crítica
+- [ ] P2-Alta
+- [ ] P3-Media
+- [ ] P4-Baja
