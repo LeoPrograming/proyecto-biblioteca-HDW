@@ -1,8 +1,17 @@
 # STM Biblioteca
 
+[![CI](https://github.com/LeoPrograming/proyecto-biblioteca-HDW/actions/workflows/ci.yml/badge.svg)](https://github.com/LeoPrograming/proyecto-biblioteca-HDW/actions/workflows/ci.yml)
+
 Sistema de gestión bibliotecaria desarrollado con Java y Spring Boot.
 
 El proyecto avanza mediante Issues, ramas de trabajo, pruebas automatizadas y Pull Requests.
+
+## Tercer avance: seguimiento de incidentes e integración continua
+
+- **GitHub Issues:** los errores y mejoras se registran como issues con etiquetas de tipo (`bug`, `enhancement`) y de prioridad (`P1-Crítica`, `P2-Alta`, `P3-Media`, `P4-Baja`), cada uno con un responsable asignado.
+- **Plantilla de reporte de error:** `.github/ISSUE_TEMPLATE/reporte-de-error.md` define los campos del reporte: pasos para reproducir, resultado esperado, resultado actual, evidencia, rol y prioridad sugerida.
+- **Flujo de resolución:** cada error se corrige en una rama `fix/issue-n`, el commit menciona `#n` y el Pull Request incluye `Closes #n` para cerrar el issue automáticamente (ejemplo: issue #74 resuelto con el PR #80).
+- **Integración continua:** el workflow `.github/workflows/ci.yml` de GitHub Actions se ejecuta en cada push y en cada Pull Request hacia `main`. Instala Java 17, levanta un MySQL temporal, compila el proyecto y ejecuta las pruebas automáticas.
 
 ## Estado actual
 
