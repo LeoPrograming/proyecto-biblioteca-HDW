@@ -102,13 +102,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (btnCerrarSesion) {
 
-        btnCerrarSesion.addEventListener("click", () => {
+            btnCerrarSesion.addEventListener("click", async () => {
+
+            try {
+                await fetch("/api/auth/logout", { method: "POST" });
+            } catch (error) {
+                console.error("No se pudo cerrar la sesión en el servidor", error);
+            }
 
             localStorage.removeItem("bibliotecaUsuario");
             localStorage.removeItem("bibliotecaSesion");
             localStorage.removeItem("vistaBibliotecario");
 
-            window.location.href = "/login";
+            window.location.replace("/login");
 
         });
 

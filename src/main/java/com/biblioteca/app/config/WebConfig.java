@@ -20,12 +20,22 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(
             InterceptorRegistry registry) {
 
+        // Todas las rutas pasan por el interceptor
+        // (incluidas las que se agreguen en el futuro),
+        // excepto las públicas y los recursos estáticos.
         registry
                 .addInterceptor(roleInterceptor)
-                .addPathPatterns(
-                        "/dashboard",
-                        "/bibliotecario",
-                        "/bibliotecario/**"
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        "/",
+                        "/login",
+                        "/error",
+                        "/api/**",
+                        "/css/**",
+                        "/js/**",
+                        "/img/**",
+                        "/images/**",
+                        "/favicon.ico"
                 );
     }
 }
