@@ -1,5 +1,7 @@
 package com.biblioteca.app.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import com.biblioteca.app.dto.NuevoPrestamoDTO;
 import com.biblioteca.app.model.Comprobante;
 import com.biblioteca.app.model.DetallePrestamo;
@@ -227,15 +229,34 @@ public class PrestamoController {
     /*
      * Busca un préstamo por su ID.
      */
+
     @GetMapping("/{id}")
     public ResponseEntity<Prestamo> buscarPorId(
-            @PathVariable Integer id
+            @PathVariable Integer id,
+            HttpServletRequest request
     ) {
+        HttpSession session = request.getSession(false);
 
-        return ResponseEntity.ok(
-                prestamoService.buscarPorId(id)
-        );
+        if (session == null
+                || session.getAttribute("usuarioId") == null
+                || session.getAttribute("tipoUsuario") == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .build();
+        }
+
+        Prestamo prestamo = prestamoService.buscarPorId(id);
+
+        if (!puedeConsultarPrestamo(session, prestamo)) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .build();
+        }
+
+        return ResponseEntity.ok(prestamo);
     }
+
 
     /*
      * Devuelve los detalles de un préstamo.
@@ -244,10 +265,32 @@ public class PrestamoController {
      * enviamos solamente los datos que necesita
      * la pantalla.
      */
+
     @GetMapping("/{id}/detalles")
     public ResponseEntity<List<Map<String, Object>>> listarDetalles(
-            @PathVariable Integer id
+            @PathVariable Integer id,
+            HttpServletRequest request
     ) {
+        HttpSession session = request.getSession(false);
+
+        if (session == null
+                || session.getAttribute("usuarioId") == null
+                || session.getAttribute("tipoUsuario") == null) {
+
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .build();
+        }
+
+        // Validamos el propietario antes de consultar
+        // y devolver los detalles del préstamo.
+        Prestamo prestamo = prestamoService.buscarPorId(id);
+
+        if (!puedeConsultarPrestamo(session, prestamo)) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .build();
+        }
 
         List<Map<String, Object>> respuesta =
                 prestamoService.listarDetalles(id)
@@ -257,6 +300,7 @@ public class PrestamoController {
 
         return ResponseEntity.ok(respuesta);
     }
+
 
     /*
      * Lista los tipos de comprobante disponibles.
@@ -460,4 +504,39 @@ public class PrestamoController {
                 .badRequest()
                 .body(respuesta);
     }
+
+
+    private boolean puedeConsultarPrestamo(
+            HttpSession session,
+            Prestamo prestamo
+    ) {
+        Object idSesion = session.getAttribute("usuarioId");
+        Object tipoUsuario = session.getAttribute("tipoUsuario");
+
+        if (!(idSesion instanceof Number) || tipoUsuario == null) {
+            return false;
+        }
+
+        String rol = tipoUsuario.toString();
+
+        // El personal autorizado puede consultar
+        // los préstamos necesarios para su gestión.
+        if ("Administrador".equalsIgnoreCase(rol)
+                || "Bibliotecario".equalsIgnoreCase(rol)) {
+            return true;
+        }
+
+        // Los demás roles no autorizados se rechazan.
+        if (!"Lector".equalsIgnoreCase(rol)) {
+            return false;
+        }
+
+        // El Lector solo puede consultar préstamos propios.
+        return prestamo.getUsuario() != null
+                && java.util.Objects.equals(
+                ((Number) idSesion).intValue(),
+                prestamo.getUsuario().getIdUsuario()
+        );
+    }
+
 }

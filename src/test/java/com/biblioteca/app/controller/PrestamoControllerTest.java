@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -154,7 +155,10 @@ class PrestamoControllerTest {
         when(prestamoService.buscarPorId(20))
                 .thenReturn(prestamo);
 
-        mockMvc.perform(get("/api/prestamos/20"))
+        mockMvc.perform(
+                        get("/api/prestamos/20")
+                                .session(sesion("Bibliotecario", 2))
+                )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.idPrestamo").value(20))
                 .andExpect(jsonPath("$.serie").value("R-2026"));
@@ -164,10 +168,15 @@ class PrestamoControllerTest {
 
     @Test
     void debeListarDetallesDelPrestamo() throws Exception {
+        when(prestamoService.buscarPorId(20))
+                .thenReturn(prestamo);
         when(prestamoService.listarDetalles(20))
                 .thenReturn(List.of(detalle));
 
-        mockMvc.perform(get("/api/prestamos/20/detalles"))
+        mockMvc.perform(
+                        get("/api/prestamos/20/detalles")
+                                .session(sesion("Bibliotecario", 2))
+                )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].idDetallePrestamo").value(30))
                 .andExpect(jsonPath("$[0].idLibro").value(10))
@@ -178,6 +187,7 @@ class PrestamoControllerTest {
                 .andExpect(jsonPath("$[0].estado").value("prestado"))
                 .andExpect(jsonPath("$[0].subtotal").value(7.50));
 
+        verify(prestamoService).buscarPorId(20);
         verify(prestamoService).listarDetalles(20);
     }
 
@@ -259,4 +269,34 @@ class PrestamoControllerTest {
                                 .value("Debe seleccionar al menos un libro.")
                 );
     }
+
+    private MockHttpSession sesion(String rol, int idUsuario) {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("usuarioId", idUsuario);
+        session.setAttribute("tipoUsuario", rol);
+        return session;
+    }
+
+    @Test
+    void lectorNoPuedeConsultarPrestamoAjeno() throws Exception {
+        when(prestamoService.buscarPorId(20))
+                .thenReturn(prestamo);
+
+        mockMvc.perform(
+                get("/api/prestamos/20")
+                        .session(sesion("Lector", 3))
+        ).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void lectorNoPuedeConsultarDetallesAjenos() throws Exception {
+        when(prestamoService.buscarPorId(20))
+                .thenReturn(prestamo);
+
+        mockMvc.perform(
+                get("/api/prestamos/20/detalles")
+                        .session(sesion("Lector", 3))
+        ).andExpect(status().isForbidden());
+    }
+
 }

@@ -1,3 +1,4 @@
+
 package com.biblioteca.app.config;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,40 +45,123 @@ public class RoleInterceptor implements HandlerInterceptor {
             Object handler) throws Exception {
 
         // Evita que el navegador muestre páginas privadas
-        // desde caché (botón "Atrás" después de cerrar sesión)
-        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        // desde caché después de cerrar sesión.
+        response.setHeader(
+                "Cache-Control",
+                "no-cache, no-store, must-revalidate"
+        );
         response.setHeader("Pragma", "no-cache");
         response.setDateHeader("Expires", 0);
 
-        HttpSession session =
-                request.getSession(false);
+        HttpSession session = request.getSession(false);
 
+        String ruta = request.getRequestURI();
+        String metodo = request.getMethod();
+
+        boolean esApi = ruta.startsWith("/api/");
+
+        // =========================
+        // VALIDACIÓN DE SESIÓN
+        // =========================
         if (session == null
                 || session.getAttribute("usuarioId") == null
                 || session.getAttribute("tipoUsuario") == null) {
 
-            response.sendRedirect("/login");
+            if (esApi) {
+                response.setStatus(
+                        HttpServletResponse.SC_UNAUTHORIZED
+                );
+
+                response.setContentType(
+                        "application/json;charset=UTF-8"
+                );
+
+                response.getWriter().write(
+                        "{\"mensaje\":\"Debe iniciar sesión\"}"
+                );
+            } else {
+                response.sendRedirect("/login");
+            }
+
             return false;
         }
 
-        String rol =
-                session.getAttribute("tipoUsuario").toString();
+        String rol = session
+                .getAttribute("tipoUsuario")
+                .toString();
 
-        String ruta =
-                request.getRequestURI();
+        boolean esLector =
+                LECTOR.equalsIgnoreCase(rol);
 
+        boolean esPersonal =
+                ADMINISTRADOR.equalsIgnoreCase(rol)
+                        || BIBLIOTECARIO.equalsIgnoreCase(rol);
 
         // =========================
-        // PANEL Y MANTENIMIENTOS DEL ADMINISTRADOR
+        // SEGURIDAD API - PRÉSTAMOS
         // =========================
-        if (coincideConAlguna(ruta, RUTAS_ADMINISTRADOR)) {
+        // Solo Administrador y Bibliotecario pueden
+        // consultar el listado general de préstamos.
+        // No afecta a POST /api/prestamos.
+        if ("GET".equalsIgnoreCase(metodo)
+                && "/api/prestamos".equals(ruta)
+                && !esPersonal) {
+
+            response.sendError(
+                    HttpServletResponse.SC_FORBIDDEN
+            );
+
+            return false;
+        }
+
+        // =========================
+        // SEGURIDAD API - COLA DE ESPERA
+        // =========================
+        // El Lector solo puede consultar
+        // sus propios registros.
+        String prefijoCola =
+                "/api/cola-espera/usuario/";
+
+        if ("GET".equalsIgnoreCase(metodo)
+                && ruta.startsWith(prefijoCola)) {
+
+            String idSolicitado =
+                    ruta.substring(prefijoCola.length());
+
+            if (idSolicitado.matches("\\d+")) {
+
+                String idSesion = String.valueOf(
+                        session.getAttribute("usuarioId")
+                );
+
+                if ((esLector
+                        && !idSesion.equals(idSolicitado))
+                        || (!esLector && !esPersonal)) {
+
+                    response.sendError(
+                            HttpServletResponse.SC_FORBIDDEN
+                    );
+
+                    return false;
+                }
+            }
+        }
+
+        // =========================
+        // PANEL Y MANTENIMIENTOS
+        // DEL ADMINISTRADOR
+        // =========================
+        if (coincideConAlguna(
+                ruta, RUTAS_ADMINISTRADOR)) {
 
             if (ADMINISTRADOR.equalsIgnoreCase(rol)) {
 
-                // Al volver al panel Administrador se cierra
-                // la "Vista como Bibliotecario"
+                // Al volver al panel Administrador,
+                // se cierra la Vista como Bibliotecario.
                 if (ruta.equals("/dashboard")) {
-                    session.removeAttribute("vistaBibliotecarioDesdeAdmin");
+                    session.removeAttribute(
+                            "vistaBibliotecarioDesdeAdmin"
+                    );
                 }
 
                 return true;
@@ -87,22 +171,20 @@ public class RoleInterceptor implements HandlerInterceptor {
             return false;
         }
 
-
         // =========================
-        // GESTIÓN COMPARTIDA (ADMIN + BIBLIOTECARIO)
+        // GESTIÓN COMPARTIDA
+        // ADMIN + BIBLIOTECARIO
         // =========================
-        if (coincideConAlguna(ruta, RUTAS_COMPARTIDAS)) {
+        if (coincideConAlguna(
+                ruta, RUTAS_COMPARTIDAS)) {
 
-            if (ADMINISTRADOR.equalsIgnoreCase(rol)
-                    || BIBLIOTECARIO.equalsIgnoreCase(rol)) {
-
+            if (esPersonal) {
                 return true;
             }
 
             redirigirSegunRol(rol, response);
             return false;
         }
-
 
         // =========================
         // PANEL BIBLIOTECARIO
@@ -115,7 +197,7 @@ public class RoleInterceptor implements HandlerInterceptor {
             }
 
             // Administrador usando
-            // "Vista como Bibliotecario"
+            // Vista como Bibliotecario
             if (ADMINISTRADOR.equalsIgnoreCase(rol)) {
 
                 Object vistaBibliotecario =
@@ -127,8 +209,8 @@ public class RoleInterceptor implements HandlerInterceptor {
                     return true;
                 }
 
-                // Si el administrador escribió
-                // /bibliotecario manualmente
+                // Si el Administrador escribió
+                // /bibliotecario manualmente.
                 response.sendRedirect("/dashboard");
                 return false;
             }
@@ -137,13 +219,12 @@ public class RoleInterceptor implements HandlerInterceptor {
             return false;
         }
 
-
         // =========================
         // MÓDULO LECTOR
         // =========================
         if (coincide(ruta, "/lector")) {
 
-            if (LECTOR.equalsIgnoreCase(rol)) {
+            if (esLector) {
                 return true;
             }
 
@@ -151,10 +232,8 @@ public class RoleInterceptor implements HandlerInterceptor {
             return false;
         }
 
-
         return true;
     }
-
 
     // =========================
     // COMPARACIÓN DE RUTAS
@@ -167,7 +246,9 @@ public class RoleInterceptor implements HandlerInterceptor {
                 || ruta.startsWith(base + "/");
     }
 
-    private boolean coincideConAlguna(String ruta, String[] bases) {
+    private boolean coincideConAlguna(
+            String ruta,
+            String[] bases) {
 
         for (String base : bases) {
 
@@ -178,7 +259,6 @@ public class RoleInterceptor implements HandlerInterceptor {
 
         return false;
     }
-
 
     // =========================
     // REDIRECCIÓN SEGÚN ROL
